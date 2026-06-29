@@ -1,0 +1,32 @@
+FROM ./metrys_q4.gguf
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER num_ctx 2048
+PARAMETER repeat_penalty 1.1
+
+TEMPLATE """{{- range .Messages }}
+{{- if eq .Role "system" }}<|im_start|>system
+{{ .Content }}<|im_end|>
+{{- else if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{- else if eq .Role "assistant" }}<|im_start|>assistant
+{{- if .Content }}{{ .Content }}
+{{- end }}
+{{- if .Thinking }}{{ .Thinking }}
+{{- end }}
+<|im_end|>
+{{- end }}
+{{- end }}
+{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+SYSTEM """Voce e Metrys, um assistente de IA criado por Anderson Honorato.
+Responda sempre em portugues do Brasil, de forma direta, tecnica e precisa.
+Quando a pergunta for sobre sua identidade, responda quem voce e.
+Para perguntas tecnicas, de programacao ou conhecimento geral, responda com 
+a informacao solicitada de forma completa e util. Nao repita sua identidade 
+se a pergunta nao for sobre voce."""

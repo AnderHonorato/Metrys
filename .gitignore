@@ -1,0 +1,56 @@
+# Credenciais e chaves
+.env
+
+# Ambiente virtual
+venv_ia/
+venv/
+.venv/
+env/
+
+# Modelos treinados (pesados, binarios)
+modelo_treinado/
+modelo_final/*.gguf
+
+# Datasets gerados (reproduziveis pelos scripts)
+datasets/
+
+# Banco de dados local
+banco_dados/
+
+# Checkpoints e logs
+logs/
+checkpoint-*/
+*.pt
+*.pth
+*.safetensors
+training_args.bin
+optimizer.pt
+scheduler.pt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Cache do HuggingFace
+cache/
+.cache/
+
+# llama.cpp (baixado pelo exportar_gguf)
+llama.cpp/
