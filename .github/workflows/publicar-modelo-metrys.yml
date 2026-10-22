@@ -1,0 +1,45 @@
+name: Publicar modelo offline Metrys
+
+on:
+  push:
+    branches: [codex/metrys-offline-20261022]
+    paths: [.github/workflows/publicar-modelo-metrys.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publicar-modelo-metrys
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      MODELO: qwen2.5-coder-1.5b-instruct-q4_k_m.gguf
+      REVISAO: f86cb2c1fa58255f8052cc32aeede1b7482d4361
+      SHA256: cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046
+      BYTES: 1117320768
+      TAG: metrys-modelo-1.5b-q4
+    steps:
+      - name: Baixar modelo oficial e verificar integridade
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --output "$MODELO" "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/$REVISAO/$MODELO"
+          test "$(stat --format=%s "$MODELO")" = "$BYTES"
+          printf '%s  %s\n' "$SHA256" "$MODELO" > SHA256SUMS
+          sha256sum --check SHA256SUMS
+          curl --fail --location --retry 3 --output LICENSE "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/$REVISAO/LICENSE"
+      - name: Publicar pesos em GitHub Releases
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --target "${{ github.sha }}" --title "Metrys — Qwen2.5-Coder 1.5B Q4_K_M" --notes "Espelho dos pesos oficiais Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF, revisão $REVISAO. Modelo Apache-2.0. Tamanho: $BYTES bytes. SHA-256: $SHA256."
+          fi
+          gh release upload "$TAG" "$MODELO" SHA256SUMS LICENSE --clobber
