@@ -23,23 +23,24 @@ jobs:
       - name: Receber e publicar pacote de fontes 0.6.0 no GitHub
         shell: bash
         env:
-          ORIGEM: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/8295ebcd-e40a-4b07-93ea-b08f06feb93e-Metrys-Offline-0.6.0-Fontes.zip'
-          SHA256_ESPERADO: '19c0a0df09fad8c60b849dc34e64c02b9140cc7d63558e86f18ac1e70b4f7aba'
+          ORIGEM: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/cb849518-96b5-4b76-95ce-43a4b72bf9bc-Metrys-Offline-0.6.0-Fontes-corrigidas.zip'
+          SHA256_ESPERADO: '34ce10814754a9eeed88e6226e2f706eb7e632522177e89513daf51ac4ba750f'
         run: |
           set -euo pipefail
           PACOTE='Metrys-Offline-0.6.0-Fontes.zip'
-          if [[ ! -f "$PACOTE" ]]; then
-            curl --fail --location --retry 3 --connect-timeout 15 --max-time 240 --output "$PACOTE" "$ORIGEM"
+          if [[ ! -f "$PACOTE" ]] || ! printf '%s  %s\n' "$SHA256_ESPERADO" "$PACOTE" | sha256sum --check --status; then
+            curl --fail --location --retry 3 --connect-timeout 15 --max-time 240 --output "$PACOTE.download" "$ORIGEM"
+            mv "$PACOTE.download" "$PACOTE"
           fi
           printf '%s  %s\n' "$SHA256_ESPERADO" "$PACOTE" | sha256sum --check
-          if ! git ls-files --error-unmatch "$PACOTE" >/dev/null 2>&1; then
+          git add "$PACOTE"
+          if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add "$PACOTE"
-            git commit -m 'build: adicionar fontes verificadas do Metrys 0.6.0'
+            git commit -m 'fix(android): corrigir captura de exceção e fontes Metrys 0.6.0'
             git push origin HEAD:main
           else
-            echo 'Pacote de fontes já versionado.'
+            echo 'Pacote de fontes atualizado já versionado.'
           fi
 
       - name: Conferir e extrair código-fonte
