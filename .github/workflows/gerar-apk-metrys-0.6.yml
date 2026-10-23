@@ -1,0 +1,93 @@
+name: Gerar APK Metrys 0.6.0 (prévia)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'Metrys-Offline-0.6.0-Fontes.zip'
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Compilar APK ARM64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Obter repositório
+        uses: actions/checkout@v4
+
+      - name: Conferir e extrair código-fonte
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          pacote=Path('Metrys-Offline-0.6.0-Fontes.zip')
+          if not pacote.is_file():
+              raise SystemExit('Envie Metrys-Offline-0.6.0-Fontes.zip para a raiz do repositório antes de executar.')
+          with zipfile.ZipFile(pacote) as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or '..' in p.parts or p.is_absolute() or i.file_size>20_000_000:
+                      raise SystemExit('Entrada insegura ou incorreta no ZIP: '+i.filename)
+                  if (i.external_attr>>16)&0o170000 == 0o120000:
+                      raise SystemExit('Não são permitidos links simbólicos no ZIP: '+i.filename)
+              z.extractall('codigo')
+          projeto=Path('codigo/metrys-mobile')
+          for obrigatorio in ['scripts/compilar-apk.py','base/Metrys-Mobile-0.4.1.apk','android/jniLibs/arm64-v8a/libmetrys.so','android/AndroidManifest.xml']:
+              if not (projeto/obrigatorio).is_file():
+                  raise SystemExit('Fonte incompleta: '+obrigatorio)
+          print('Fontes extraídas e validadas.')
+          PY
+
+      - name: Instalar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Instalar SDK Android 36
+        shell: bash
+        run: |
+          sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+          test -f "$ANDROID_HOME/platforms/android-36/android.jar"
+          test -x "$ANDROID_HOME/build-tools/36.0.0/aapt2"
+
+      - name: Testar persistência e sintaxe
+        run: python3 codigo/metrys-mobile/scripts/testar-evolucao.py
+
+      - name: Preparar diretórios exigidos pelo compilador
+        shell: bash
+        run: |
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas"
+          mkdir -p "$FERRAMENTAS/jdk-17.0.20.1+1/bin"
+          ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
+          for comando in java javac keytool; do
+            ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"
+          done
+
+      - name: Compilar, alinhar, assinar e verificar APK de prévia
+        shell: bash
+        run: |
+          python3 codigo/metrys-mobile/scripts/compilar-apk.py \
+            --ferramentas "$RUNNER_TEMP/ferramentas" \
+            --variante previa \
+            --saida "$GITHUB_WORKSPACE/Metrys-Offline-0.6.0-Previa.apk"
+          sha256sum Metrys-Offline-0.6.0-Previa.apk > Metrys-Offline-0.6.0-Previa.sha256
+
+      - name: Disponibilizar APK nos artefatos
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.0-Previa-Android-ARM64
+          path: |
+            Metrys-Offline-0.6.0-Previa.apk
+            Metrys-Offline-0.6.0-Previa.verificacao.json
+            Metrys-Offline-0.6.0-Previa.sha256
+          retention-days: 30
+          if-no-files-found: error
