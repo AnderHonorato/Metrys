@@ -23,8 +23,8 @@ jobs:
       - name: Receber e publicar pacote de fontes 0.6.0 no GitHub
         shell: bash
         env:
-          ORIGEM: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/cb849518-96b5-4b76-95ce-43a4b72bf9bc-Metrys-Offline-0.6.0-Fontes-corrigidas.zip'
-          SHA256_ESPERADO: '34ce10814754a9eeed88e6226e2f706eb7e632522177e89513daf51ac4ba750f'
+          ORIGEM: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/b2a5c090-3bc7-4994-9347-8252f6251aaa-Metrys-Offline-0.6.0-Fontes-prontas-build.zip'
+          SHA256_ESPERADO: 'b998cf178d15b41e793dd487a2b45eb409632c210378f618b3cbaf229cd0b38c'
         run: |
           set -euo pipefail
           PACOTE='Metrys-Offline-0.6.0-Fontes.zip'
