@@ -1,0 +1,49 @@
+name: Publicar APK Metrys 0.6.0 (prévia)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publicar-apk-metrys-0.6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  publicar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Baixar APK já compilado e validado
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          gh run download 39997898340 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.0-Previa-Android-ARM64' --dir release
+          test -s release/Metrys-Offline-0.6.0-Previa.apk
+          cd release
+          sha256sum --check Metrys-Offline-0.6.0-Previa.sha256
+          unzip -t Metrys-Offline-0.6.0-Previa.apk | tail -n 1
+      - name: Publicar prévia na aba Releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh release view v0.6.0-preview --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "A prévia já existe. Não substituir: certificado da assinatura poderia mudar."
+            exit 0
+          fi
+          gh release create v0.6.0-preview \
+            release/Metrys-Offline-0.6.0-Previa.apk \
+            release/Metrys-Offline-0.6.0-Previa.sha256 \
+            release/Metrys-Offline-0.6.0-Previa.verificacao.json \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title 'Metrys 0.6.0 - Prévia Android ARM64' \
+            --notes 'Versão experimental compilada em 23/10/2026 (GitHub Actions run 39997898340). APK assinado e alinhado, não testado em aparelho físico. Instala separadamente do Metrys atual, preservando os dados da versão instalada. Motor ARM64 incluído; o modelo GGUF continua sendo baixado pelo aplicativo. Esta prévia usa certificado novo e não atualiza a instalação anterior.' \
+            --prerelease
