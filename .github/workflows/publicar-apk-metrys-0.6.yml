@@ -1,10 +1,6 @@
-name: Publicar APK Metrys 0.6.0 (prévia)
+name: Pausado - Publicar APK Metrys 0.6.0 (prévia)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/publicar-apk-metrys-0.6.yml'
   workflow_dispatch:
 
 permissions:
