@@ -46,13 +46,15 @@ jobs:
           ponto=" priv=RAIZ/'android/.assinatura';"
           assert ponto in s
           s=s.split(ponto,1)[0]
-          s += """ rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')
- a.saida.parent.mkdir(parents=True,exist_ok=True)
- shutil.copy2(w/'alinhado.apk',a.saida)
- print('APK ORIGINAL ALINHADO E SEM ASSINATURA',a.saida)
- return
-if __name__=='__main__':main()
-"""
+          linhas=[
+            " rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')",
+            " a.saida.parent.mkdir(parents=True,exist_ok=True)",
+            " shutil.copy2(w/'alinhado.apk',a.saida)",
+            " print('APK ORIGINAL ALINHADO E SEM ASSINATURA',a.saida)",
+            " return",
+            "if __name__=='__main__':main()"
+          ]
+          s += '\n'.join(linhas)+'\n'
           f.write_text(s)
           PY
       - name: Compilar APK com identificador original
