@@ -1,12 +1,64 @@
-name: Diagnóstico visual do Metrys
+name: Diagnostico de abertura Metrys
 on:
+  push:
+    paths: ['.github/workflows/diagnostico-smoke.yml']
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 jobs:
   teste:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     steps:
-      - name: Preparar arquivos de teste
-        run: echo "Preparando validação de inicialização sem alterar o APK instalado"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Baixar APK Android 0.6.2 do Actions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p entrada
+          gh run download 40056193412 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.2-UX-Sem-Assinatura' --dir entrada
+          sdkmanager --install 'build-tools;35.0.0'
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('entrada/Metrys-0.6.2-SEM-ASSINATURA.apk') as z,zipfile.ZipFile('teste-sem-lib.apk','w') as o:
+              for info in z.infolist():
+                  if info.filename.startswith(('lib/','META-INF/')):continue
+                  o.writestr(info,z.read(info))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -P 16 4 teste-sem-lib.apk teste-alinhado.apk
+          keytool -genkeypair -keystore teste.jks -alias debug -storepass android123 -keypass android123 -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=Emulador' -noprompt
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks teste.jks --ks-pass pass:android123 --key-pass pass:android123 --ks-key-alias debug --out teste-instalavel.apk teste-alinhado.apk
+      - name: Executar abertura de atividade sem modelo carregado
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          ram-size: 3072M
+          script: |
+            adb install teste-instalavel.apk
+            adb logcat -c
+            adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaOffline
+            sleep 6
+            adb logcat -d -v time > relatorio-logcat.txt
+            adb shell dumpsys activity activities > relatorio-atividade.txt
+            if grep -E 'FATAL EXCEPTION|Unable to start activity|ClassNotFoundException|NoClassDefFoundError|VerifyError' relatorio-logcat.txt; then
+              grep -A 30 -B 3 'FATAL EXCEPTION' relatorio-logcat.txt | tail -n 80
+              exit 1
+            fi
+            grep 'br.com.anderflow.metrys.offline' relatorio-atividade.txt | head -n 5
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrys-android-startup-diagnostico
+          path: |
+            relatorio-logcat.txt
+            relatorio-atividade.txt
+          if-no-files-found: ignore
+          retention-days: 5
