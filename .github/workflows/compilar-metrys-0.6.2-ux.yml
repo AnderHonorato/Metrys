@@ -22,8 +22,8 @@ jobs:
         run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
       - name: Baixar código 0.6.2 sem chaves privadas
         env:
-          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/56c4da69-8ed6-47f3-82b1-d1bcb0dc7e02-Metrys-0.6.2-UX-Fontes-Publicas.zip'
-          ZIP_SHA256: '89296c53e6dfa17a34227fe2d0e6ebdd4117fe47673e2c1717f565b6fd06639f'
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/ce9f7d45-70e9-417d-a230-7972e2c7d38f-Metrys-0.6.2-UX-Fontes-Publicas-corrigidas.zip'
+          ZIP_SHA256: 'f95a62fb56845797f40b967e78496aff160cfdef68a24e3699d6a138048d8ddb'
         shell: bash
         run: |
           set -euo pipefail
