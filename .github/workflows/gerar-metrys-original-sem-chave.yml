@@ -1,0 +1,79 @@
+name: Metrys 0.6 - APK original sem assinatura
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gerar-metrys-original-sem-chave.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compilar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Instalar recursos Android
+        run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Extrair fontes
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('Metrys-Offline-0.6.0-Fontes.zip') as f:
+              for item in f.infolist():
+                  p=Path(item.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or '..' in p.parts or p.is_absolute() or item.file_size>20_000_000:
+                      raise SystemExit('Entrada inválida no ZIP')
+              f.extractall('codigo')
+          PY
+      - name: Testar base de código
+        run: python3 codigo/metrys-mobile/scripts/testar-evolucao.py
+      - name: Substituir etapa de assinatura por saída alinhada sem chave
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          f=Path('codigo/metrys-mobile/scripts/compilar-apk.py')
+          s=f.read_text()
+          ponto=" priv=RAIZ/'android/.assinatura';"
+          assert ponto in s
+          trecho=""" rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')
+          a.saida.parent.mkdir(parents=True,exist_ok=True)
+          shutil.copy2(w/'alinhado.apk',a.saida)
+          print('APK ORIGINAL ALINHADO E SEM ASSINATURA',a.saida)
+          return
+          """
+          s=s.replace(ponto,trecho.replace('\n          ','\n ')+ponto,1)
+          f.write_text(s)
+          PY
+      - name: Compilar APK com identificador original
+        run: |
+          set -euo pipefail
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas"
+          mkdir -p "$FERRAMENTAS/jdk-17.0.20.1+1/bin"
+          ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
+          for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
+          python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante original --saida "$GITHUB_WORKSPACE/Metrys-0.6.0-original-SEM-ASSINATURA.apk"
+          aapt2 dump badging Metrys-0.6.0-original-SEM-ASSINATURA.apk | head -n 6
+          echo 'ID 0.5 de referência:'
+          aapt2 dump badging codigo/metrys-mobile/referencias/Metrys-Offline-0.5.0.apk | head -n 6
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" ./apksigner-36.0.0.jar
+          sha256sum Metrys-0.6.0-original-SEM-ASSINATURA.apk > pacote.sha256
+      - name: Enviar artefato para assinatura privada
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.0-Original-Sem-Assinatura
+          path: |
+            Metrys-0.6.0-original-SEM-ASSINATURA.apk
+            apksigner-36.0.0.jar
+            pacote.sha256
+          retention-days: 5
+          if-no-files-found: error
