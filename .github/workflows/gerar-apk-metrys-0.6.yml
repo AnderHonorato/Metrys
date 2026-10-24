@@ -1,12 +1,7 @@
-name: Gerar APK Metrys 0.6.0 (prévia)
+name: Pausado - APK Metrys 0.6.0 (prévia)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'Metrys-Offline-0.6.0-Fontes.zip'
-      - '.github/workflows/gerar-apk-metrys-0.6.yml'
 
 permissions:
   contents: write
