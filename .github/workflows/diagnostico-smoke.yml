@@ -16,16 +16,16 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v4
-      - name: Baixar APK Android 0.6.2 do Actions
+      - name: Baixar APK Android 0.6.4 do Actions
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p entrada
-          gh run download 40056193412 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.2-UX-Sem-Assinatura' --dir entrada
+          gh run download 40088339358 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.4-UX-Sem-Assinatura' --dir entrada
           sdkmanager --install 'build-tools;35.0.0'
           python3 - <<'PY'
           import zipfile
-          with zipfile.ZipFile('entrada/Metrys-0.6.2-SEM-ASSINATURA.apk') as z,zipfile.ZipFile('teste-sem-lib.apk','w') as o:
+          with zipfile.ZipFile('entrada/Metrys-0.6.4-SEM-ASSINATURA.apk') as z,zipfile.ZipFile('teste-sem-lib.apk','w') as o:
               for info in z.infolist():
                   if info.filename.startswith(('lib/','META-INF/')):continue
                   o.writestr(info,z.read(info))
