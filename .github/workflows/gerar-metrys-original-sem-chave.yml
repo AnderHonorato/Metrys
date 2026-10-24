@@ -37,6 +37,19 @@ jobs:
           PY
       - name: Testar base de código
         run: python3 codigo/metrys-mobile/scripts/testar-evolucao.py
+      - name: Preservar fontes e recursos da versão 0.5
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          raiz=Path('codigo/metrys-mobile')
+          with ZipFile(raiz/'referencias/Metrys-Offline-0.5.0.apk') as antigo:
+              for nome in ('res/font/lora.ttf','res/font/manrope.ttf'):
+                  destino=raiz/'android'/nome
+                  destino.parent.mkdir(parents=True,exist_ok=True)
+                  destino.write_bytes(antigo.read(nome))
+          print('Fontes originais preservadas no build.')
+          PY
       - name: Substituir etapa de assinatura por saída alinhada sem chave
         run: |
           python3 - <<'PY'
@@ -68,6 +81,14 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.0-original-SEM-ASSINATURA.apk | head -n 6
           echo 'ID 0.5 de referência:'
           "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging codigo/metrys-mobile/referencias/Metrys-Offline-0.5.0.apk | head -n 6
+          python3 - <<'PY'
+          import subprocess,os
+          aapt2=os.environ['ANDROID_HOME']+'/build-tools/36.0.0/aapt2'
+          saida=subprocess.check_output([aapt2,'dump','resources','Metrys-0.6.0-original-SEM-ASSINATURA.apk'],text=True)
+          for valor in ('0x7f010000','0x7f020000','0x7f020001','0x7f030000'):
+              if valor not in saida: raise SystemExit('ID do recurso antigo ausente: '+valor)
+          print('Todos os quatro IDs legados preservados.')
+          PY
           cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" ./apksigner-36.0.0.jar
           sha256sum Metrys-0.6.0-original-SEM-ASSINATURA.apk > pacote.sha256
       - name: Enviar artefato para assinatura privada
