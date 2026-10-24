@@ -45,13 +45,14 @@ jobs:
           s=f.read_text()
           ponto=" priv=RAIZ/'android/.assinatura';"
           assert ponto in s
-          trecho=""" rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')
-          a.saida.parent.mkdir(parents=True,exist_ok=True)
-          shutil.copy2(w/'alinhado.apk',a.saida)
-          print('APK ORIGINAL ALINHADO E SEM ASSINATURA',a.saida)
-          return
-          """
-          s=s.replace(ponto,trecho.replace('\n          ','\n ')+ponto,1)
+          s=s.split(ponto,1)[0]
+          s += """ rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')
+ a.saida.parent.mkdir(parents=True,exist_ok=True)
+ shutil.copy2(w/'alinhado.apk',a.saida)
+ print('APK ORIGINAL ALINHADO E SEM ASSINATURA',a.saida)
+ return
+if __name__=='__main__':main()
+"""
           f.write_text(s)
           PY
       - name: Compilar APK com identificador original
@@ -62,9 +63,9 @@ jobs:
           ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
           for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
           python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante original --saida "$GITHUB_WORKSPACE/Metrys-0.6.0-original-SEM-ASSINATURA.apk"
-          aapt2 dump badging Metrys-0.6.0-original-SEM-ASSINATURA.apk | head -n 6
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.0-original-SEM-ASSINATURA.apk | head -n 6
           echo 'ID 0.5 de referência:'
-          aapt2 dump badging codigo/metrys-mobile/referencias/Metrys-Offline-0.5.0.apk | head -n 6
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging codigo/metrys-mobile/referencias/Metrys-Offline-0.5.0.apk | head -n 6
           cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" ./apksigner-36.0.0.jar
           sha256sum Metrys-0.6.0-original-SEM-ASSINATURA.apk > pacote.sha256
       - name: Enviar artefato para assinatura privada
