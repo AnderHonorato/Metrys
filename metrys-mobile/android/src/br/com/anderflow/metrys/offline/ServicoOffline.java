@@ -188,7 +188,7 @@ public final class ServicoOffline {
     estado("pronto",cancelado?"Geração interrompida. O conteúdo recebido foi salvo.":resultado==MotorLocal.LIMITE_CONTEXTO?"Limite do contexto ativo atingido. Peça para continuar; o histórico foi preservado.":"Resposta concluída.");
    }catch(Throwable e){
     fluxo.finalizar();atualizarFluxo(fluxo,resposta);
-    if(!refazer&&!salva&&resposta.length()>0)try{salvarResposta(conversa,resposta.toString(),false,pedido,cancelado?"interrompido":"erro");}catch(RuntimeException falha){e.addSuppressed(falha);}
+    if(!refazer&&!salva&&resposta.length()>0)try{salvarResposta(conversa,resposta.toString(),false,pedido,cancelado?"interrompido":"erro");salva=true;}catch(RuntimeException falha){e.addSuppressed(falha);}
     if(cancelado){conclusao="interrompido";estado("pronto","Geração interrompida. O conteúdo recebido foi salvo.");}
     else if(e instanceof OutOfMemoryError){MotorLocal m=motor;if(m!=null)m.close();motor=null;erro(new IOException("Memória insuficiente. Feche outros aplicativos ou escolha um modelo menor."));}
     else erro(e);
