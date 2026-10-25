@@ -1,4 +1,7 @@
-# Verificação do motor reconstruído
+# Registro histórico da base anterior
+
+Este relatório veio do ZIP de referência e não descreve o motor da 0.6.10.
+A verificação atual está em [0.6.10-VERIFICACAO.md](../../docs/0.6.10-VERIFICACAO.md).
 
 Resultados executados novamente após a reconstrução dos arquivos nesta sessão.
 

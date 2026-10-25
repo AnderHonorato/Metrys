@@ -174,7 +174,7 @@ public final class TelaOffline extends Activity implements ServicoOffline.Ouvido
      if(fluxo){if(r.textoFluxo==null){r.corpo.removeAllViews();r.textoFluxo=texto("",15,TEXTO,false);r.textoFluxo.setTextIsSelectable(true);r.textoFluxo.setLineSpacing(d(5),1);r.corpo.addView(r.textoFluxo);}r.textoFluxo.setText(seguro(m.texto));}
      else{r.textoFluxo=null;renderTexto(r.corpo,seguro(m.texto));}
     }atualizarAtividade(r,m);}}
-  atualizarEnvio();legenda.setText(e.filaPendente>0?e.filaPendente+" mensagem(ns) na fila":"");legenda.setVisibility(e.filaPendente>0?View.VISIBLE:View.GONE);if(mudou||perto||forcarFundo){forcarFundo=false;scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));}
+  atualizarEnvio();legenda.setText(e.filaPendente>0?(e.filaPausada?"Fila pausada · ":"")+e.filaPendente+" mensagem(ns)"+(e.filaPausada?" · Toque para tentar novamente":" na fila"):"");legenda.setVisibility(e.filaPendente>0?View.VISIBLE:View.GONE);legenda.setOnClickListener(v->{if(estado!=null&&estado.filaPausada)servico.retomarFila();});if(mudou||perto||forcarFundo){forcarFundo=false;scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));}
  }
  private boolean igual(String a,String b){return a==null?b==null:a.equals(b);}private String seguro(String s){return s==null?"":s;}
  private String descricao(String f){if("baixando".equals(f))return "Baixando o modelo";if("verificando".equals(f))return "Conferindo o arquivo";if("carregando".equals(f))return "Preparando o modelo";if("contexto".equals(f))return "Organizando a conversa";if("gerando".equals(f))return "Criando uma resposta";if("pronto".equals(f))return "Pronto para conversar";if("erro".equals(f))return "O modelo precisa de atenção";return "Prepare seu espaço offline";}

@@ -23,7 +23,10 @@ public final class TesteInterface extends Instrumentation {
    Intent intent=new Intent(Intent.ACTION_MAIN).setClassName(getTargetContext(),"br.com.anderflow.metrys.offline.TelaOffline").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
    a=startActivitySync(intent);waitForIdleSync();final Activity tela=a;
    principal(()->{ServicoOffline.obter(getTargetContext()).remover((ServicoOffline.Ouvidor)tela);definir(tela,"observando",false);});
-   testarBanco();testarRegeneracaoFalha();testarInterface(tela);
+   ServicoOffline servico=ServicoOffline.obter(getTargetContext());long limite=SystemClock.elapsedRealtime()+15000;
+   while(((Boolean)campo(servico,"ocupado")||servico.estado().conversaId.isEmpty())&&SystemClock.elapsedRealtime()<limite)Thread.sleep(25);
+   conferir(!(Boolean)campo(servico,"ocupado"),"Serviço não terminou inicialização");
+   testarBanco();testarRegeneracaoFalha();testarFilaComFalha();testarInterface(tela);
    waitForIdleSync();try(java.io.FileOutputStream f=new java.io.FileOutputStream(new java.io.File(getTargetContext().getExternalFilesDir(null),"metrys-qa.png"))){getUiAutomation().takeScreenshot().compress(android.graphics.Bitmap.CompressFormat.PNG,100,f);}
    resultado.putString("stream","PASS Android: banco, fila durável, retomada idempotente, regeneração com falha, expansão persistente, tema e anexo\n");
    principal(tela::finish);finish(Activity.RESULT_OK,resultado);
@@ -38,6 +41,10 @@ public final class TesteInterface extends Instrumentation {
   b.iniciarPedido(primeiro.id);b.iniciarPedido(primeiro.id);
   List<HistoricoLocal.Mensagem> mensagens=b.mensagens(conversa);conferir(mensagens.size()==1,"Retomada duplicou a pergunta");
   long pergunta=mensagens.get(0).id;b.salvarAtividade(pergunta,"Calculando","Atividade gerada","gerando",500);
+  b.getWritableDatabase().execSQL("CREATE TEMP TRIGGER rejeitar_resposta BEFORE INSERT ON mensagens WHEN NEW.papel='assistant' BEGIN SELECT RAISE(ABORT,'falha de persistência simulada'); END");
+  boolean falhou=false;try{b.concluirGeracao(conversa,"Resposta",false,pergunta,"Calculando","Atividade gerada","concluido",1000,primeiro.id);}catch(android.database.sqlite.SQLiteException ex){falhou=true;}
+  conferir(falhou&&b.pedidosPendentes().size()==fila.size()&&b.mensagens(conversa).size()==1,"Falha transacional perdeu pedido ou confirmou resposta parcial");
+  b.getWritableDatabase().execSQL("DROP TRIGGER rejeitar_resposta");
   b.concluirGeracao(conversa,"Resposta",false,pergunta,"Calculando","Atividade gerada","concluido",1000,primeiro.id);
   b.close();b=new BancoMetrys(getTargetContext());
   conferir(b.mensagens(conversa).get(0).atividade.equals("Atividade gerada"),"Atividade não persistiu");
@@ -45,6 +52,18 @@ public final class TesteInterface extends Instrumentation {
   b.iniciarPedido(segundo.id);conferir(b.mensagens(conversa).size()==3,"Segunda pergunta não seguiu a primeira resposta");
   b.recuperarAtividadesInterrompidas();conferir(b.mensagens(conversa).get(0).estadoAtividade.equals("concluido"),"Recuperação alterou atividade concluída");
   b.excluirConversa(conversa);b.close();
+ }
+ private void testarFilaComFalha()throws Exception{
+  ServicoOffline s=ServicoOffline.obter(getTargetContext());String original=s.estado().conversaId;
+  BancoMetrys b=new BancoMetrys(getTargetContext());String conversa=b.nova();
+  synchronized(s){definir(s,"id",conversa);definir(s,"modeloPronto",true);}
+  conferir(s.enviar("Não perder esta mensagem"),"Fila recusou mensagem válida");
+  long limite=SystemClock.elapsedRealtime()+15000;
+  while((!(Boolean)campo(s,"filaPausada")||(Boolean)campo(s,"ocupado"))&&SystemClock.elapsedRealtime()<limite)Thread.sleep(25);
+  conferir((Boolean)campo(s,"filaPausada"),"Falha de inferência não pausou fila");
+  conferir(b.pedidosPendentes().size()==1&&s.filaPendente()==1,"Falha apagou pedido aceito");
+  conferir(b.mensagens(conversa).get(0).texto.equals("Não perder esta mensagem"),"Texto aceito foi perdido");
+  synchronized(s){definir(s,"id",original);definir(s,"modeloPronto",false);((Collection<?>)campo(s,"filaMensagens")).clear();definir(s,"filaPausada",false);}b.excluirConversa(conversa);b.close();
  }
  private void testarRegeneracaoFalha()throws Exception{
   ServicoOffline s=ServicoOffline.obter(getTargetContext());
@@ -69,6 +88,8 @@ public final class TesteInterface extends Instrumentation {
   EstadoOffline.Mensagem pergunta=new EstadoOffline.Mensagem("user","Minha pergunta");pergunta.id=101;pergunta.atividade="Verificando o conteúdo.\n```python\nprint('prévia')\n```";pergunta.tituloAtividade="Verificando o conteúdo.";pergunta.estadoAtividade="concluido";pergunta.duracaoMs=1000;
   e.mensagens.add(pergunta);e.mensagens.add(new EstadoOffline.Mensagem("assistant","Resposta final"));
   principal(()->{
+   tela.getSharedPreferences("atividades_abertas",Context.MODE_PRIVATE).edit().remove("101").remove("102").apply();
+   definir(tela,"detalhesAbertos",false);
    chamar(tela,"desenhar",new Class<?>[]{EstadoOffline.class},e);
    Object r=((List<?>)campo(tela,"renderizadas")).get(0);LinearLayout painel=(LinearLayout)campo(r,"atividadePainel");
    conferir(painel.getVisibility()==View.VISIBLE,"Painel não aparece");

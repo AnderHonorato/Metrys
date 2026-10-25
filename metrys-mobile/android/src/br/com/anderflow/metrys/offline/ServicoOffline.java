@@ -14,6 +14,7 @@ public final class ServicoOffline {
  private final ArrayList<JSONObject> opcoesModelos=new ArrayList<>();
  private final ArrayList<String> etapas=new ArrayList<>();private volatile int trechosGerados=0;
  private final ArrayDeque<BancoMetrys.Pedido> filaMensagens=new ArrayDeque<>();
+ private boolean filaPausada=false;
  private boolean avisoDemora=false;
  private final Runnable relogioGeracao=new Runnable(){@Override public void run(){
   final boolean ativo;final long espera;final boolean semTrecho;
@@ -47,7 +48,7 @@ public final class ServicoOffline {
  public synchronized EstadoOffline estado(){
   EstadoOffline s=new EstadoOffline();s.fase=fase;s.detalhe=detalhe;s.bytes=bytes;s.total=total;s.gerando=gerando;s.modeloPronto=modeloPronto;s.conversaId=id;
   s.nomeModelo=catalogo==null?"Modelo local":catalogo.optString("nome",catalogo.optString("id"));s.etapas=new ArrayList<>(etapas);s.trechosGerados=trechosGerados;s.raciocinioPublicado=raciocinioPublicado;s.raciocinando=raciocinando;
-  s.filaPendente=filaMensagens.size();s.tempoGeracaoMs=inicioGeracao==0?0:Math.max(0,(gerando?SystemClock.elapsedRealtime():fimGeracao)-inicioGeracao);
+  s.filaPendente=filaMensagens.size();s.filaPausada=filaPausada;s.tempoGeracaoMs=inicioGeracao==0?0:Math.max(0,(gerando?SystemClock.elapsedRealtime():fimGeracao)-inicioGeracao);
   if(historico!=null){for(BancoMetrys.Projeto p:historico.projetos(true))s.projetos.add(new EstadoOffline.Projeto(p.id,p.nome,p.arquivado));for(HistoricoLocal.Conversa c:historico.conversas())s.conversas.add(new EstadoOffline.Conversa(c.id,c.titulo,historico.projetoDaConversa(c.id)));for(HistoricoLocal.Conversa c:historico.conversas(true))s.conversasArquivadas.add(new EstadoOffline.Conversa(c.id,c.titulo,historico.projetoDaConversa(c.id)));if(!id.isEmpty())for(HistoricoLocal.Mensagem m:historico.mensagens(id))s.mensagens.add(new EstadoOffline.Mensagem(m));}
   // A base do fluxo guarda somente mensagens persistidas. Parcial nunca vira histórico salvo.
   mensagensPersistidas=new ArrayList<>(s.mensagens);
@@ -59,7 +60,7 @@ public final class ServicoOffline {
   if(ultimoCompleto==null)return estado();
   EstadoOffline s=new EstadoOffline();s.fase=fase;s.detalhe=detalhe;s.bytes=bytes;s.total=total;s.gerando=gerando;s.modeloPronto=modeloPronto;s.conversaId=id;
   s.nomeModelo=catalogo==null?"Modelo local":catalogo.optString("nome",catalogo.optString("id"));s.etapas=new ArrayList<>(etapas);s.trechosGerados=trechosGerados;s.raciocinioPublicado=raciocinioPublicado;s.raciocinando=raciocinando;
-  s.filaPendente=filaMensagens.size();s.tempoGeracaoMs=inicioGeracao==0?0:Math.max(0,(gerando?SystemClock.elapsedRealtime():fimGeracao)-inicioGeracao);
+  s.filaPendente=filaMensagens.size();s.filaPausada=filaPausada;s.tempoGeracaoMs=inicioGeracao==0?0:Math.max(0,(gerando?SystemClock.elapsedRealtime():fimGeracao)-inicioGeracao);
   s.conversas=ultimoCompleto.conversas;s.conversasArquivadas=ultimoCompleto.conversasArquivadas;s.projetos=ultimoCompleto.projetos;
   s.mensagens=new ArrayList<>(mensagensPersistidas);
   aplicarAtividadeAtual(s);
@@ -85,8 +86,8 @@ public final class ServicoOffline {
   }catch(Exception e){erro(e);}finally{liberar();}});
  }
  private void erro(Throwable e){String m=e.getMessage();estado("erro",m==null?"Não foi possível concluir a operação. Tente novamente.":m);}
- private synchronized boolean reservar(){if(ocupado||!filaMensagens.isEmpty())return false;ocupado=true;cancelado=false;return true;}
- private void liberar(){boolean pendente;synchronized(this){ocupado=false;gerando=false;refazendo=false;perguntaAtiva=0;textoParcial="";pendente=!filaMensagens.isEmpty();}publicar();if(pendente)main.post(this::executarProximaDaFila);}
+ private synchronized boolean reservar(){if(ocupado||(!filaPausada&&!filaMensagens.isEmpty()))return false;ocupado=true;cancelado=false;return true;}
+ private void liberar(){boolean pendente;synchronized(this){ocupado=false;gerando=false;refazendo=false;perguntaAtiva=0;textoParcial="";pendente=!filaPausada&&!filaMensagens.isEmpty();}publicar();if(pendente)main.post(this::executarProximaDaFila);}
  public void baixarModelo(){
   if(catalogo==null){estado("erro","Aguarde a preparação do aplicativo e tente novamente.");return;}if(!reservar())return;
   try{app.startForegroundService(new Intent(app,OperacaoModeloService.class));}catch(RuntimeException e){liberar();erro(new IOException("Mantenha o aplicativo aberto e tente baixar novamente.",e));return;}
@@ -125,7 +126,7 @@ public final class ServicoOffline {
   executor.execute(()->{
    StringBuilder resposta=new StringBuilder();boolean salva=false;String conclusao="erro";
    FluxoResposta fluxo=new FluxoResposta(catalogo.optBoolean("raciocinio",false));
-   synchronized(this){perguntaAtiva=0;}
+   synchronized(this){perguntaAtiva=0;id=conversa;}
    try{
     if(historico==null)throw new IOException("O histórico ainda está sendo preparado.");
     if(!refazer)historico.iniciarPedido(pedido);
@@ -194,7 +195,10 @@ public final class ServicoOffline {
    }finally{
     synchronized(this){fimGeracao=SystemClock.elapsedRealtime();}
     try{salvarAtividade(conclusao);}catch(RuntimeException e){erro(e);}
-    try{historico.finalizarPedido(pedido);}catch(RuntimeException e){erro(e);}finally{main.removeCallbacks(relogioGeracao);liberar();}
+    // Somente concluirGeracao pode remover o pedido. Falha de disco/inferência
+    // conserva a aceitação durável e pausa a fila, sem repetição automática.
+    if(pedido!=0&&!salva)synchronized(this){filaMensagens.addFirst(new BancoMetrys.Pedido(pedido,conversa,texto));filaPausada=true;}
+    main.removeCallbacks(relogioGeracao);liberar();
    }
   });
  }
@@ -218,10 +222,11 @@ public final class ServicoOffline {
  }
  private void executarProximaDaFila(){
   final BancoMetrys.Pedido proxima;
-  synchronized(this){if(ocupado||gerando||!modeloPronto)return;proxima=filaMensagens.pollFirst();if(proxima==null)return;ocupado=true;cancelado=false;}
+  synchronized(this){if(ocupado||gerando||filaPausada||!modeloPronto)return;proxima=filaMensagens.pollFirst();if(proxima==null)return;ocupado=true;cancelado=false;}
   iniciarResposta(proxima.conversa,proxima.texto,false,proxima.id);
  }
  public int filaPendente(){synchronized(this){return filaMensagens.size();}}
+ public synchronized boolean retomarFila(){if(ocupado||historico==null)return false;filaMensagens.clear();filaMensagens.addAll(historico.pedidosPendentes());filaPausada=false;publicar();main.post(this::executarProximaDaFila);return true;}
  public void avaliarResposta(String conversa,String texto,int nota){if(historico==null||texto==null||texto.isEmpty())return;executor.execute(()->{try{historico.avaliar(conversa,texto,nota);publicar();}catch(Exception e){erro(e);}});}
  public void novaConversa(){if(!reservar())return;executor.execute(()->{try{id=historico.nova();synchronized(this){etapas.clear();trechosGerados=0;raciocinioPublicado="";raciocinando=false;}estado(modeloPronto?"pronto":"ausente",modeloPronto?"Nova conversa, memória limpa.":"Baixe o modelo para começar.");}catch(Exception e){erro(e);}finally{liberar();}});}
  public void selecionarConversa(String nova){if(!reservar())return;executor.execute(()->{try{historico.mensagens(nova);id=nova;synchronized(this){etapas.clear();trechosGerados=0;raciocinioPublicado="";raciocinando=false;}publicar();}catch(Exception e){erro(e);}finally{liberar();}});}
