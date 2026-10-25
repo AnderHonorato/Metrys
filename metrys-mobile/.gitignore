@@ -1,0 +1,12 @@
+android/.assinatura/
+android/cpp/build-*/
+build/
+entrega/
+*.part
+*.log
+__pycache__/
+.orquestracao/
+referencias/
+
+# Arquivos de fonte permanecem no ZIP original fornecido pelo usuário
+android/res/font/*.ttf

@@ -47,6 +47,7 @@ build/
 Thumbs.db
 .DS_Store
 Desktop.ini
+/entrega/
 
 # Cache do HuggingFace
 cache/

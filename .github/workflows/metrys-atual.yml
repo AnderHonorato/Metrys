@@ -1,0 +1,79 @@
+name: Metrys atual - compilar e testar Android
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'metrys-mobile/**'
+      - '.github/workflows/metrys-atual.yml'
+permissions:
+  contents: read
+concurrency:
+  group: metrys-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Instalar ferramentas Android
+        run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0' 'ndk;29.0.14206865' 'cmake;3.31.6'
+      - name: Testar contratos e persistência
+        run: |
+          python3 metrys-mobile/scripts/testar-evolucao.py
+          c++ -std=c++17 -Wall -Wextra -Werror metrys-mobile/android/cpp/verificar_canais.cpp -o /tmp/metrys-canais
+          /tmp/metrys-canais
+          c++ -std=c++17 -Wall -Wextra -Werror metrys-mobile/android/cpp/verificar_memoria.cpp -o /tmp/metrys-memoria
+          /tmp/metrys-memoria
+          c++ -std=c++17 -Wall -Wextra -Werror metrys-mobile/android/cpp/verificar_utf8.cpp -o /tmp/metrys-utf8
+          /tmp/metrys-utf8
+      - name: Recompilar JNI ARM64 a partir do código atual
+        run: |
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas" ANDROID_NDK_HOME="$ANDROID_HOME/ndk/29.0.14206865" CMAKE="$ANDROID_HOME/cmake/3.31.6/bin/cmake" NINJA="$ANDROID_HOME/cmake/3.31.6/bin/ninja" bash metrys-mobile/scripts/compilar-motor.sh
+      - name: Compilar pacote original sem assinatura e instrumentação de teste
+        run: |
+          mkdir -p "$RUNNER_TEMP/ferramentas"
+          ln -s "$ANDROID_HOME" "$RUNNER_TEMP/ferramentas/sdk"
+          ln -s "$JAVA_HOME" "$RUNNER_TEMP/ferramentas/jdk-17.0.20.1+1"
+          python3 metrys-mobile/scripts/compilar-apk.py --ferramentas "$RUNNER_TEMP/ferramentas" --sem-assinatura --saida entrega/Metrys-0.6.10-SEM-ASSINATURA.apk
+          python3 metrys-mobile/scripts/compilar-apk.py --ferramentas "$RUNNER_TEMP/ferramentas" --sem-assinatura --qa-ui --saida entrega/qa-ui-sem-assinatura.apk
+          python3 metrys-mobile/scripts/compilar-testes-android.py --ferramentas "$RUNNER_TEMP/ferramentas" --saida entrega/qa-instrumentacao-sem-assinatura.apk
+          keytool -genkeypair -keyalg RSA -keysize 2048 -validity 1 -keystore "$RUNNER_TEMP/qa.jks" -storepass android123 -keypass android123 -alias qa -dname 'CN=Teste Metrys' -noprompt
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/qa.jks" --ks-pass pass:android123 --out entrega/qa-ui.apk entrega/qa-ui-sem-assinatura.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks "$RUNNER_TEMP/qa.jks" --ks-pass pass:android123 --out entrega/qa-instrumentacao.apk entrega/qa-instrumentacao-sem-assinatura.apk
+      - name: Testar expansão, histórico, banco e rascunhos no Android
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo udevadm settle
+          ls -l /dev/kvm
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+      - name: Executar instrumentação no Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: default
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash metrys-mobile/scripts/testar-interface-android.sh
+      - name: Preservar evidências e pacote para assinatura privada
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.10-verificacao
+          path: |
+            entrega/Metrys-0.6.10-SEM-ASSINATURA.apk
+            entrega/Metrys-0.6.10-SEM-ASSINATURA.verificacao.json
+            entrega/qa/
+          if-no-files-found: error
+          retention-days: 14

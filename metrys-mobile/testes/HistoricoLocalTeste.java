@@ -1,0 +1,9 @@
+package br.com.anderflow.metrys.offline;
+import java.io.*;import java.nio.file.*;import java.util.*;
+public class HistoricoLocalTeste{
+ public static void main(String[]a)throws Exception{
+  File p=Files.createTempDirectory("hist-metrys-").toFile();HistoricoLocal h=new HistoricoLocal(p);String id=h.nova(),texto="Olá 👋 "+String.join("",Collections.nCopies(80000,"á"));h.adicionar(id,"user",texto);h.adicionar(id,"assistant","Resposta");String outro=h.nova();h.adicionar(outro,"user","Outro chat");h=new HistoricoLocal(p);if(!h.mensagens(id).get(0).texto.equals(texto)||h.mensagens(id).size()!=2)throw new AssertionError("Unicode/isolaçao");boolean rejeitou=false;try{h.adicionar(id,"system","ruim");}catch(IllegalArgumentException e){rejeitou=true;}if(!rejeitou)throw new AssertionError("Papel inválido");byte[] antes=Files.readAllBytes(new File(p,"historico.bin").toPath());Files.write(new File(p,"historico.bin").toPath(),new byte[]{1,2});rejeitou=false;try{new HistoricoLocal(p);}catch(IOException e){rejeitou=true;}if(!rejeitou)throw new AssertionError("Truncado aceito");Files.write(new File(p,"historico.bin").toPath(),antes);
+  File limite=Files.createTempDirectory("hist-limite-").toFile();File arq=new File(limite,"historico.bin");try(DataOutputStream out=new DataOutputStream(new FileOutputStream(arq))){out.writeInt(0x4d545259);out.writeInt(1);out.writeInt(10000);for(int i=0;i<10000;i++){byte[] b=("id"+i).getBytes("UTF-8");out.writeInt(b.length);out.write(b);out.writeInt(1);out.writeByte('x');out.writeInt(0);}}h=new HistoricoLocal(limite);antes=Files.readAllBytes(arq.toPath());rejeitou=false;try{h.nova();}catch(IOException e){rejeitou=true;}if(!rejeitou||!Arrays.equals(antes,Files.readAllBytes(arq.toPath()))||new HistoricoLocal(limite).conversas().size()!=10000)throw new AssertionError("Limite/rollback");
+  System.out.println("PASS histórico: Unicode, longos, isolamento, papéis, truncamento e limite com rollback");
+ }
+}

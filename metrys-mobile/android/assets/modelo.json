@@ -1,0 +1,83 @@
+{
+  "id": "qwen2.5-coder-1.5b-instruct-q4_k_m",
+  "bytes": 1117320768,
+  "sha256": "cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046",
+  "urls": [
+    "https://github.com/AnderHonorato/Metrys/releases/download/metrys-modelo-1.5b-q4/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+  ],
+  "drive_pasta": "https://drive.google.com/drive/folders/1saUmS-3XWak5PJk5vnvLJcJxBWw9OFlf",
+  "partes": [
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte001",
+      "bytes": 100663296,
+      "id": "1lrx5DQHyNYOVfa3pEcyT9Hu6IirfONG-",
+      "url": "https://drive.google.com/file/d/1lrx5DQHyNYOVfa3pEcyT9Hu6IirfONG-/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte002",
+      "bytes": 100663296,
+      "id": "1ME4hPz1axK25jyLxI4v6E9nBWJb0YOS5",
+      "url": "https://drive.google.com/file/d/1ME4hPz1axK25jyLxI4v6E9nBWJb0YOS5/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte003",
+      "bytes": 100663296,
+      "id": "1hW4DfLvVxwIR6J66Hkf2_ZwGL67CfUfm",
+      "url": "https://drive.google.com/file/d/1hW4DfLvVxwIR6J66Hkf2_ZwGL67CfUfm/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte004",
+      "bytes": 100663296,
+      "id": "1zgPbQwyMJlpDPovsQy-kKcECe1r25WqL",
+      "url": "https://drive.google.com/file/d/1zgPbQwyMJlpDPovsQy-kKcECe1r25WqL/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte005",
+      "bytes": 100663296,
+      "id": "1Wqg_9RwZazG4ECpuuM0ho1ilcr3BBt5J",
+      "url": "https://drive.google.com/file/d/1Wqg_9RwZazG4ECpuuM0ho1ilcr3BBt5J/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte006",
+      "bytes": 100663296,
+      "id": "1M2WBfn4O5YgTQhgUL_YKwtZaN_xKfR-s",
+      "url": "https://drive.google.com/file/d/1M2WBfn4O5YgTQhgUL_YKwtZaN_xKfR-s/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte007",
+      "bytes": 100663296,
+      "id": "1Nf362OmEUJbx0if-JXcbBowURqV_QLJ_",
+      "url": "https://drive.google.com/file/d/1Nf362OmEUJbx0if-JXcbBowURqV_QLJ_/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte008",
+      "bytes": 100663296,
+      "id": "1r4ntRRxO3ufqbIycT2CKz6GC0h1z8Eq4",
+      "url": "https://drive.google.com/file/d/1r4ntRRxO3ufqbIycT2CKz6GC0h1z8Eq4/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte009",
+      "bytes": 100663296,
+      "id": "1C0Em-4VcXRGVvIAOT-g_7FOQpiNqXQyp",
+      "url": "https://drive.google.com/file/d/1C0Em-4VcXRGVvIAOT-g_7FOQpiNqXQyp/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte010",
+      "bytes": 100663296,
+      "id": "1RUqeNyJhU5-UvPd0pHoy67VywI9debak",
+      "url": "https://drive.google.com/file/d/1RUqeNyJhU5-UvPd0pHoy67VywI9debak/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte011",
+      "bytes": 100663296,
+      "id": "1GypIAxOiBQ9DMtkt1YF3XcXEcd7h0E7z",
+      "url": "https://drive.google.com/file/d/1GypIAxOiBQ9DMtkt1YF3XcXEcd7h0E7z/view?usp=drivesdk"
+    },
+    {
+      "nome": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf.parte012",
+      "bytes": 10024512,
+      "id": "1p0DV4azED6ZA5brL_-WJI-81BUDxjx9z",
+      "url": "https://drive.google.com/file/d/1p0DV4azED6ZA5brL_-WJI-81BUDxjx9z/view?usp=drivesdk"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+[
+  {
+    "id": "qwen2.5-coder-3b-instruct-q4_k_m",
+    "nome": "Metrys Coder 3B · Equilibrado",
+    "familia": "qwen2",
+    "perfil": "Código e projetos maiores",
+    "bytes": 1929903360,
+    "sha256": "3da3afe6cf5c674ac195803ea0dd6fee7e1c228c2105c1ce8c66890d1d4ab460",
+    "urls": [
+      "https://huggingface.co/bartowski/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf"
+    ],
+    "ram_min_gb": 6,
+    "contexto": 2048,
+    "threads": 3
+  },
+  {
+    "id": "qwen3-4b-instruct-2507-q4_k_m",
+    "nome": "Metrys Instruct 4B · Avançado",
+    "familia": "qwen3",
+    "perfil": "Textos, planejamento e código; não oferece modo de raciocínio explícito",
+    "bytes": 2497281120,
+    "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+    "urls": [
+      "https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf"
+    ],
+    "ram_min_gb": 8,
+    "contexto": 1536,
+    "threads": 3
+  },
+  {
+    "id": "qwen3-4b-thinking-2507-q4_k_m",
+    "nome": "Metrys Reason 4B · Raciocínio visível",
+    "familia": "qwen3",
+    "perfil": "Modelo com fluxo de raciocínio público gerado em tempo real; mais lento",
+    "bytes": 2497281152,
+    "sha256": "ddd52e18200baab281c5c46f70d544ce4d4fe4846eab1608f2fff48a64554212",
+    "urls": [
+      "https://huggingface.co/unsloth/Qwen3-4B-Thinking-2507-GGUF/resolve/main/Qwen3-4B-Thinking-2507-Q4_K_M.gguf"
+    ],
+    "ram_min_gb": 8,
+    "contexto": 3072,
+    "threads": 3,
+    "raciocinio": true
+  }
+]
