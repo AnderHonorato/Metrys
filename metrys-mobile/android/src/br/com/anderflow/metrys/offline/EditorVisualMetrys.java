@@ -26,6 +26,7 @@ public final class EditorVisualMetrys {
  private Button botao(String s,Runnable r){Button b=new Button(activity);b.setText(s);b.setAllCaps(false);b.setOnClickListener(v->r.run());return b;}
  private void atualizarVisual(){
   Typeface fonte=Typeface.create(visual.getInt("fonte",0)==2?"serif":"sans-serif",Typeface.NORMAL);
+  if(visual.getInt("fonte",0)==0){try{int id=activity.getResources().getIdentifier("manrope","font",activity.getPackageName());if(id!=0)fonte=Typeface.create(activity.getResources().getFont(id),400,false);}catch(RuntimeException ignored){}}
   int escala=visual.getInt("escala",100),espaco=visual.getInt("espacamento",0);
   for(TextView amostra:new TextView[]{visualizacao,amostraUsuario,amostraIA})if(amostra!=null){amostra.setTypeface(fonte);amostra.setLineSpacing(d(3+espaco),1f);}
   if(amostraUsuario!=null){LinearLayout.LayoutParams lp=(LinearLayout.LayoutParams)amostraUsuario.getLayoutParams();lp.leftMargin=d(visual.getInt("margem_usuario",32));amostraUsuario.setLayoutParams(lp);}

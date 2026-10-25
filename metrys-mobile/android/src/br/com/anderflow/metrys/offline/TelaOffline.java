@@ -55,7 +55,7 @@ public final class TelaOffline extends Activity implements ServicoOffline.Ouvido
   if(salvo==null&&ValueAnimator.areAnimatorsEnabled())mostrarSplash();
  }
  private void atualizarFontes(){int escolha=getSharedPreferences("estudio_visual",MODE_PRIVATE).getInt("fonte",0);if(escolha==1){corpo=Typeface.create("sans-serif",Typeface.NORMAL);titulo=Typeface.create("sans-serif-medium",Typeface.NORMAL);}else if(escolha==2){corpo=Typeface.create("serif",Typeface.NORMAL);titulo=Typeface.create("serif",Typeface.NORMAL);}else{corpo=fonte("manrope",Typeface.create("sans-serif",Typeface.NORMAL));titulo=fonte("lora",Typeface.create("serif",Typeface.NORMAL));}}
- private Typeface fonte(String n,Typeface padrao){try{int id=getResources().getIdentifier(n,"font",getPackageName());return id==0?padrao:getResources().getFont(id);}catch(Exception e){return padrao;}}
+ private Typeface fonte(String n,Typeface padrao){try{int id=getResources().getIdentifier(n,"font",getPackageName());return id==0?padrao:Typeface.create(getResources().getFont(id),400,false);}catch(Exception e){return padrao;}}
  @Override protected void onStart(){super.onStart();observando=true;servico.observar(this);desenhar(servico.estado());}
  @Override protected void onStop(){
   observando=false;servico.remover(this);main.removeCallbacks(atualizar);atualizarAgendado=false;
