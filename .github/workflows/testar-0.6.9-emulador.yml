@@ -1,0 +1,76 @@
+name: Testar abertura Metrys 0.6.9 no Android
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/testar-0.6.9-emulador.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  abrir:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar APK para emulador (chave descartável)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'build-tools;35.0.0'
+          mkdir -p entrada
+          gh run download 40171020539 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.9-UX-Sem-Assinatura' --dir entrada
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('entrada/Metrys-0.6.9-SEM-ASSINATURA.apk') as fonte, zipfile.ZipFile('teste-sem-motor.apk','w') as alvo:
+              for item in fonte.infolist():
+                  if item.filename.startswith(('lib/', 'META-INF/')):continue
+                  alvo.writestr(item,fonte.read(item))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -P 16 4 teste-sem-motor.apk alinhado.apk
+          keytool -genkeypair -keyalg RSA -keysize 2048 -validity 1 -keystore efemero.jks -storepass android123 -keypass android123 -alias debug -dname 'CN=Teste Metrys' -noprompt
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks efemero.jks --ks-pass pass:android123 --key-pass pass:android123 --ks-key-alias debug --out somente-emulador.apk alinhado.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify somente-emulador.apk
+          if test -e /dev/kvm; then sudo chmod 666 /dev/kvm; else echo "Sem aceleracao KVM"; fi
+      - name: Instalar, abrir e conferir logcat
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disk-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -e
+            adb install somente-emulador.apk
+            adb logcat -c
+            adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaOffline
+            sleep 6
+            adb logcat -d -v threadtime > logcat-metrys.txt
+            adb shell dumpsys activity activities > estado-atividade.txt
+            adb shell screencap -p /sdcard/metrys.png
+            adb pull /sdcard/metrys.png captura-metrys.png
+            if grep -E 'FATAL EXCEPTION|Unable to start activity|VerifyError|NoClassDefFoundError|ClassNotFoundException' logcat-metrys.txt; then
+              grep -A 22 -B 3 'FATAL EXCEPTION' logcat-metrys.txt | tail -n 70
+              exit 1
+            fi
+            grep -E 'ResumedActivity.*br.com.anderflow.metrys.offline|mResumedActivity.*br.com.anderflow.metrys.offline' estado-atividade.txt
+      - name: Salvar diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.9-Smoke-Test
+          path: |
+            logcat-metrys.txt
+            estado-atividade.txt
+            captura-metrys.png
+          retention-days: 5
+          if-no-files-found: ignore
