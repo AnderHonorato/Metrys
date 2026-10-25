@@ -22,6 +22,11 @@ def main():
    destino=recursos_fonte/'font'/f'{nome}.ttf'
    if not destino.is_file():
     destino.parent.mkdir(parents=True,exist_ok=True);destino.write_bytes(original.read(f'res/font/{nome}.ttf'))
+ assets_fonte=w/'assets';shutil.copytree(RAIZ/'android/assets',assets_fonte)
+ # A Manrope variável tem eixo padrão 200. Assets permitem selecionar wght=400
+ # com Typeface.Builder também no Android 9, sem modificar o arquivo da fonte.
+ (assets_fonte/'fonts').mkdir(exist_ok=True)
+ for nome in ('lora','manrope'):shutil.copy2(recursos_fonte/'font'/f'{nome}.ttf',assets_fonte/'fonts'/f'{nome}.ttf')
  rodar(bt/'aapt2','compile','--dir',recursos_fonte,'-o',w/'recursos.zip')
  manifesto=RAIZ/'android/AndroidManifest.xml'
  pacote='br.com.anderflow.metrys.offline'
@@ -30,7 +35,7 @@ def main():
   manifesto=w/'AndroidManifest.xml';manifesto.write_text(conteudo,encoding='utf-8')
   pacote+='.previa'
  opcoes=['--rename-manifest-package',pacote,'--custom-package','br.com.anderflow.metrys.offline'] if a.variante=='previa' else []
- rodar(bt/'aapt2','link','-o',w/'base.apk','--manifest',manifesto,'-I',platform,'--java',w/'gerados','-A',RAIZ/'android/assets',*opcoes,w/'recursos.zip')
+ rodar(bt/'aapt2','link','-o',w/'base.apk','--manifest',manifesto,'-I',platform,'--java',w/'gerados','-A',assets_fonte,*opcoes,w/'recursos.zip')
  fontes=list((RAIZ/'android/src').rglob('*.java'))+list((w/'gerados').rglob('*.java'))
  rodar(jdk/'javac','-source','8','-target','8','-encoding','UTF-8','-bootclasspath',str(platform)+os.pathsep+str(bt/'core-lambda-stubs.jar'),'-d',w/'classes',*fontes)
  rodar(jdk/'java','-cp',bt/'lib/d8.jar','com.android.tools.r8.D8','--release','--min-api','28','--lib',platform,'--output',w/'dex',*list((w/'classes').rglob('*.class')))
