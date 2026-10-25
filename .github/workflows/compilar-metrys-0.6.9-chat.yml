@@ -22,7 +22,7 @@ jobs:
         run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
       - name: Baixar código 0.6.9 sem chaves privadas
         env:
-          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/3adbf347-1895-49f9-993b-94f60cfc90e8-Metrys-0.6.9-Interface-Real-Fontes.zip'
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/3adbf347-1895-49f9-993b-94f60cfc90e8-Metrys-0.6.8-Interface-Real-Fontes.zip'
           ZIP_SHA256: 'b2aedf8fe041a46a6b267f8a9fd66a6d716b68ea2cf5e0ef8a295d9d83e11d96'
         shell: bash
         run: |
@@ -44,8 +44,8 @@ jobs:
           PY
       - name: Aplicar correções de interface e serviço 0.6.9
         env:
-          PATCH_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/d24f8380-43ea-4b0e-805a-eaa3ed243c9c-Metrys-0.6.9-UX-Patch.zip'
-          PATCH_SHA: '2abf17112114a5d8adad8b533171067908f67d0b99108bbc15af80aff512b888'
+          PATCH_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/6359b8b5-e3a4-4d08-9912-bac0cffc1564-Metrys-0.6.9-UX-Patch-Corrigido.zip'
+          PATCH_SHA: '399e2d4aff7838949a6da8d732514b5fa672692197aa084f722cec89ac3c3390'
         run: |
           curl -fLsS --retry 3 --max-time 90 --output atualizacao.zip "$PATCH_URL"
           echo "$PATCH_SHA  atualizacao.zip" | sha256sum --check
