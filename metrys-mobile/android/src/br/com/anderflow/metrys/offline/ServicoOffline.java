@@ -86,7 +86,7 @@ public final class ServicoOffline {
   }catch(Exception e){erro(e);}finally{liberar();}});
  }
  private void erro(Throwable e){String m=e.getMessage();estado("erro",m==null?"Não foi possível concluir a operação. Tente novamente.":m);}
- private synchronized boolean reservar(){if(ocupado||(!filaPausada&&!filaMensagens.isEmpty()))return false;ocupado=true;cancelado=false;return true;}
+ private synchronized boolean reservar(){if(ocupado||(!filaPausada&&modeloPronto&&!filaMensagens.isEmpty()))return false;ocupado=true;cancelado=false;return true;}
  private void liberar(){boolean pendente;synchronized(this){ocupado=false;gerando=false;refazendo=false;perguntaAtiva=0;textoParcial="";pendente=!filaPausada&&!filaMensagens.isEmpty();}publicar();if(pendente)main.post(this::executarProximaDaFila);}
  public void baixarModelo(){
   if(catalogo==null){estado("erro","Aguarde a preparação do aplicativo e tente novamente.");return;}if(!reservar())return;

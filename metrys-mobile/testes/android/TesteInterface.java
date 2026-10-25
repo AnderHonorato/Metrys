@@ -63,6 +63,10 @@ public final class TesteInterface extends Instrumentation {
   conferir((Boolean)campo(s,"filaPausada"),"Falha de inferência não pausou fila");
   conferir(b.pedidosPendentes().size()==1&&s.filaPendente()==1,"Falha apagou pedido aceito");
   conferir(b.mensagens(conversa).get(0).texto.equals("Não perder esta mensagem"),"Texto aceito foi perdido");
+  synchronized(s){definir(s,"modeloPronto",false);}s.retomarFila();
+  Method reservar=ServicoOffline.class.getDeclaredMethod("reservar");reservar.setAccessible(true);
+  conferir((Boolean)reservar.invoke(s),"Fila sem modelo bloqueou recuperação/download");
+  synchronized(s){definir(s,"ocupado",false);}
   synchronized(s){definir(s,"id",original);definir(s,"modeloPronto",false);((Collection<?>)campo(s,"filaMensagens")).clear();definir(s,"filaPausada",false);}b.excluirConversa(conversa);b.close();
  }
  private void testarRegeneracaoFalha()throws Exception{
