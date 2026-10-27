@@ -45,13 +45,13 @@ jobs:
       - name: Recompilar motor nativo ARM64 na versão fixada do llama.cpp
         run: |
           set -euo pipefail
-          sdkmanager --install 'ndk;27.2.12479018'
+          sdkmanager --install 'ndk;27.2.12479018' 'cmake;3.22.1'
           FERRAMENTAS="$RUNNER_TEMP/ferramentas"
           mkdir -p "$FERRAMENTAS"
           ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
           export FERRAMENTAS
-          export CMAKE=/usr/bin/cmake
-          export NINJA=/usr/bin/ninja
+          export CMAKE="$ANDROID_HOME/cmake/3.22.1/bin/cmake"
+          export NINJA="$ANDROID_HOME/cmake/3.22.1/bin/ninja"
           export JOBS=3
           export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
           export LLAMA_SOURCE_DIR="$FERRAMENTAS/llama.cpp-620d222"
