@@ -1,0 +1,81 @@
+name: Testar abertura Metrys 0.6.12 no Android
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/testar-metrys-0.6.12-android.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  teste:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 38
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar APK para emulador
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'build-tools;36.0.0' 'platform-tools'
+          mkdir -p entrada
+          gh run download 40492327799 --repo "$GITHUB_REPOSITORY" --name Metrys-0.6.12-UX-Sem-Assinatura --dir entrada
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          orig=list(Path('entrada').glob('*.apk'))
+          assert len(orig)==1, orig
+          with zipfile.ZipFile(orig[0]) as z,zipfile.ZipFile('x86-sem-lib.apk','w') as out:
+              for i in z.infolist():
+                  if i.filename.startswith(('lib/','META-INF/')):continue
+                  out.writestr(i,z.read(i),compress_type=i.compress_type)
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -f -P 16 4 x86-sem-lib.apk x86-alinhado.apk
+          keytool -genkeypair -keystore debug.jks -alias debug -storepass android123 -keypass android123 -keyalg RSA -keysize 2048 -validity 3 -dname 'CN=QA Metrys' -noprompt
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks debug.jks --ks-key-alias debug --ks-pass pass:android123 --key-pass pass:android123 --out qa-android.apk x86-alinhado.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify qa-android.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging qa-android.apk | grep '^package:'
+      - name: Subir Android 29 e abrir tela de recuperacao
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 2048M
+          disk-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -e
+            adb install qa-android.apk
+            adb logcat -c
+            adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaSegura | tee am-start.txt
+            sleep 10
+            adb logcat -d -v time > logcat.txt
+            adb shell dumpsys activity activities > atividades.txt
+            adb shell screencap -p /sdcard/metrys-qa.png
+            adb pull /sdcard/metrys-qa.png metrys-qa.png
+            grep -Ei 'FATAL EXCEPTION|Process: br.com.anderflow.metrys.offline' logcat.txt || true
+            if grep -A 30 -B 4 'FATAL EXCEPTION' logcat.txt | grep -q 'br.com.anderflow.metrys.offline';then
+              grep -A 30 -B 4 'FATAL EXCEPTION' logcat.txt | tail -n 90
+              exit 1
+            fi
+            adb shell pidof br.com.anderflow.metrys.offline
+            grep 'br.com.anderflow.metrys.offline/.TelaSegura' atividades.txt | head -n 3
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrys-0.6.12-emulador-qa
+          path: |
+            am-start.txt
+            logcat.txt
+            atividades.txt
+            metrys-qa.png
+          if-no-files-found: ignore
+          retention-days: 5
