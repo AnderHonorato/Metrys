@@ -1,0 +1,82 @@
+name: Testar abertura Metrys 0.6.11
+on:
+  push:
+    paths:
+      - '.github/workflows/testar-abertura-metrys-0.6.11.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inicializacao:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Habilitar KVM
+        run: |
+          ls -l /dev/kvm || true
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+          ls -l /dev/kvm || true
+      - name: Preparar APK para emulador x86
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'build-tools;35.0.0'
+          mkdir -p recebido
+          gh run download 40460608010 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.11-UX-Sem-Assinatura' --dir recebido
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('recebido/Metrys-0.6.11-SEM-ASSINATURA.apk') as a,zipfile.ZipFile('testebase.apk','w') as b:
+              for i in a.infolist():
+                  if i.filename.startswith(('lib/','META-INF/')):continue
+                  b.writestr(i,a.read(i))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -P 16 4 testebase.apk alinhado.apk
+          keytool -genkeypair -keystore teste.jks -storepass android123 -keypass android123 -alias teste -keyalg RSA -keysize 2048 -validity 1 -dname 'CN=Metrys Startup Test' -noprompt
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks teste.jks --ks-pass pass:android123 --key-pass pass:android123 --ks-key-alias teste --out teste-instalavel.apk alinhado.apk
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: default
+          arch: x86_64
+          profile: pixel_2
+          cores: 2
+          ram-size: 2048M
+          heap-size: 256M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            set -euo pipefail
+            adb install teste-instalavel.apk
+            adb logcat -c
+            adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaOffline
+            sleep 8
+            adb logcat -d -v time > teste-logcat.txt
+            adb shell dumpsys activity activities > teste-atividade.txt
+            adb shell screencap -p /sdcard/metrys.png
+            adb pull /sdcard/metrys.png teste-captura.png
+            PID="$(adb shell pidof br.com.anderflow.metrys.offline | tr -d '\r')"
+            echo "PID: $PID"
+            if [ -z "$PID" ]; then
+              grep -A 40 -B 5 "FATAL EXCEPTION" teste-logcat.txt | tail -n 100 || true
+              exit 1
+            fi
+            echo 'Metrys permanece aberto no emulador'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: metrys-0.6.11-abertura-teste
+          path: |
+            teste-logcat.txt
+            teste-atividade.txt
+            teste-captura.png
+          if-no-files-found: ignore
+          retention-days: 3
