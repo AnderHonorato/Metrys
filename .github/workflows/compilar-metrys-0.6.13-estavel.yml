@@ -1,0 +1,132 @@
+name: Compilar Metrys 0.6.13 - UX e streaming
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compilar-metrys-0.6.13-estavel.yml'
+permissions:
+  contents: read
+jobs:
+  compilar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar SDK
+        run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Baixar código 0.6.13 sem chaves privadas
+        env:
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/3adbf347-1895-49f9-993b-94f60cfc90e8-Metrys-0.6.8-Interface-Real-Fontes.zip'
+          ZIP_SHA256: 'b2aedf8fe041a46a6b267f8a9fd66a6d716b68ea2cf5e0ef8a295d9d83e11d96'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 240 --output codigo.zip "$ZIP_URL"
+          echo "$ZIP_SHA256  codigo.zip" | sha256sum --check
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('codigo.zip') as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or '..' in p.parts or p.is_absolute() or i.file_size>20000000 or (i.external_attr>>16)&0o170000==0o120000:
+                      raise SystemExit('Entrada inválida: '+i.filename)
+                  z.extract(i,'codigo')
+          fonte=Path('codigo/metrys-mobile')
+          for f in ('scripts/compilar-apk.py','android/AndroidManifest.xml','android/jniLibs/arm64-v8a/libmetrys.so'):
+              if not (fonte/f).is_file():raise SystemExit('Fonte ausente: '+f)
+          PY
+      - name: Aplicar correções de interface e serviço 0.6.13
+        env:
+          PATCH_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/6359b8b5-e3a4-4d08-9912-bac0cffc1564-Metrys-0.6.9-UX-Patch-Corrigido.zip'
+          PATCH_SHA: '399e2d4aff7838949a6da8d732514b5fa672692197aa084f722cec89ac3c3390'
+        run: |
+          curl -fLsS --retry 3 --max-time 90 --output atualizacao.zip "$PATCH_URL"
+          echo "$PATCH_SHA  atualizacao.zip" | sha256sum --check
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          prefix='metrys-mobile/android/'
+          with zipfile.ZipFile('atualizacao.zip') as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not i.filename.startswith(prefix) or p.is_absolute() or '..' in p.parts or i.file_size>250_000 or ((i.external_attr>>16)&0o170000)==0o120000:
+                      raise SystemExit('Patch inválido: '+i.filename)
+                  z.extract(i, 'codigo')
+          PY
+      - name: Criar inicialização independente e processo separado para a IA
+        env:
+          RESGATE_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/7106e1e8-b347-4d6a-a698-f81ab3d0f9ba-Metrys-0.6.13-Entrada-Independente-Patch.zip'
+          RESGATE_SHA: 'aa06ad6c3d779c6d39cd9fbaee024106315f6907a545f0d0640c4895591607d6'
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 90 --output resgate.zip "$RESGATE_URL"
+          echo "$RESGATE_SHA  resgate.zip" | sha256sum --check
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          permitido={
+           'metrys-mobile/android/AndroidManifest.xml',
+           'metrys-mobile/android/src/br/com/anderflow/metrys/offline/TelaEstavel.java',
+           'metrys-mobile/android/src/br/com/anderflow/metrys/offline/MetrysAplicativo.java'
+          }
+          with zipfile.ZipFile('resgate.zip') as z:
+              arquivos={i.filename for i in z.infolist() if not i.is_dir()}
+              assert arquivos==permitido, (arquivos,permitido)
+              for item in z.infolist():
+                  if item.is_dir():continue
+                  assert item.file_size<80000
+                  z.extract(item, 'codigo')
+          manifest=(Path('codigo/metrys-mobile/android/AndroidManifest.xml')).read_text()
+          assert 'android:versionCode="23"' in manifest
+          assert 'android:versionName="0.6.13"' in manifest
+          assert 'br.com.anderflow.metrys.offline.TelaEstavel' in manifest
+          assert 'android:process=":conversa"' in manifest
+          PY
+      - name: Executar testes locais
+        run: python3 codigo/metrys-mobile/scripts/testar-evolucao.py
+      - name: Gerar pacote alinhado sem acesso à chave original
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('codigo/metrys-mobile/scripts/compilar-apk.py')
+          s=p.read_text()
+          marca=" priv=RAIZ/'android/.assinatura';"
+          if marca not in s:raise SystemExit('Trecho de assinatura não localizado')
+          s=s.split(marca,1)[0]
+          s+='\n'.join([
+            " rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')",
+            " a.saida.parent.mkdir(parents=True,exist_ok=True)",
+            " shutil.copy2(w/'alinhado.apk',a.saida)",
+            " print('APK alinhado sem assinatura para operação privada.')",
+            " return",
+            "if __name__=='__main__':main()"
+          ])+'\n'
+          p.write_text(s)
+          PY
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas"
+          mkdir -p "$FERRAMENTAS/jdk-17.0.20.1+1/bin"
+          ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
+          for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
+          python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante original --saida "$GITHUB_WORKSPACE/Metrys-0.6.13-SEM-ASSINATURA.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.13-SEM-ASSINATURA.apk | grep '^package:'
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" ./apksigner-36.0.0.jar
+          cp "$ANDROID_HOME/build-tools/36.0.0/zipalign" ./zipalign-36.0.0
+          chmod +x ./zipalign-36.0.0
+          sha256sum Metrys-0.6.13-SEM-ASSINATURA.apk > pacote.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.13-UX-Sem-Assinatura
+          path: |
+            Metrys-0.6.13-SEM-ASSINATURA.apk
+            apksigner-36.0.0.jar
+            zipalign-36.0.0
+            pacote.sha256
+          retention-days: 7
+          if-no-files-found: error
