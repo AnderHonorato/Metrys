@@ -1,0 +1,94 @@
+name: Testar abertura Metrys 0.6.13 em Android
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/testar-metrys-0.6.13-entrada.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  testar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar APK de emulador sem motor ARM64 e certificado de teste
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'build-tools;36.0.0'
+          mkdir -p entrada
+          gh run download 40773214003 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.13-UX-Sem-Assinatura' --dir entrada
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          arquivos=list(Path('entrada').glob('*.apk'));assert len(arquivos)==1,arquivos
+          with zipfile.ZipFile(arquivos[0]) as z,zipfile.ZipFile('sem-motor-arm64.apk','w') as out:
+              for i in z.infolist():
+                  if i.filename.startswith(('lib/','META-INF/')):continue
+                  out.writestr(i,z.read(i),compress_type=i.compress_type)
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -f -P 16 4 sem-motor-arm64.apk teste-alinhado.apk
+          keytool -genkeypair -keystore debug-qa.jks -alias qa -storepass android123 -keypass android123 -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=QA Android' -noprompt
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks debug-qa.jks --ks-key-alias qa --ks-pass pass:android123 --key-pass pass:android123 --out metrys-qa.apk teste-alinhado.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify metrys-qa.apk
+          cat > conferir-abertura.sh <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          adb install --no-incremental metrys-qa.apk
+          adb logcat -c
+          adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaEstavel | tee inicio.txt
+          sleep 6
+          adb shell pidof br.com.anderflow.metrys.offline | tee processo-principal.txt
+          adb shell screencap -p /sdcard/metrys-entrada.png
+          adb pull /sdcard/metrys-entrada.png metrys-entrada.png
+          adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaOffline | tee conversa.txt
+          sleep 4
+          adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaEstavel | tee retorno.txt
+          sleep 3
+          adb shell pidof br.com.anderflow.metrys.offline | tee processo-retorno.txt
+          adb shell dumpsys activity activities > atividades.txt
+          adb logcat -d -v time > logcat.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          l=Path('logcat.txt').read_text(errors='replace')
+          hits=[line for line in l.splitlines() if 'FATAL EXCEPTION' in line or 'Process: br.com.anderflow.metrys.offline' in line]
+          print('Excecoes vistas:',*hits[-10:],sep='\n')
+          assert Path('processo-retorno.txt').read_text().strip(),'Processo principal encerrou'
+          assert Path('metrys-entrada.png').stat().st_size>1000,'Sem captura da tela'
+          PY
+          SH
+          chmod +x conferir-abertura.sh
+      - name: Iniciar e testar em Android 35
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 3072M
+          disk-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash conferir-abertura.sh
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrys-0.6.13-comprovacao-abertura
+          path: |
+            inicio.txt
+            conversa.txt
+            retorno.txt
+            processo-principal.txt
+            processo-retorno.txt
+            atividades.txt
+            logcat.txt
+            metrys-entrada.png
+          retention-days: 5
+          if-no-files-found: ignore
