@@ -62,8 +62,8 @@ jobs:
           PY
       - name: Criar inicialização independente e processo separado para a IA
         env:
-          RESGATE_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/7106e1e8-b347-4d6a-a698-f81ab3d0f9ba-Metrys-0.6.13-Entrada-Independente-Patch.zip'
-          RESGATE_SHA: 'aa06ad6c3d779c6d39cd9fbaee024106315f6907a545f0d0640c4895591607d6'
+          RESGATE_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/237a0f83-f800-4afb-9b0b-2cf71b1c30d1-Metrys-0.6.13-Entrada-Independente-Patch-v2.zip'
+          RESGATE_SHA: '900a0a0f3cedb630067d08ad78c505aac4d41d2a83fee3b344d0202356ecbb57'
         run: |
           set -euo pipefail
           curl -fLsS --retry 3 --max-time 90 --output resgate.zip "$RESGATE_URL"
