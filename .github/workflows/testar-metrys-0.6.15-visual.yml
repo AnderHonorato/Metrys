@@ -1,0 +1,94 @@
+name: Validar UI 0.6.15 no emulador Android
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/testar-metrys-0.6.15-visual.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar APK para o emulador (x86)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          sdkmanager --install 'build-tools;36.0.0'
+          mkdir -p pacote
+          gh run download 40857541764 --repo "$GITHUB_REPOSITORY" --name 'Metrys-0.6.15-UX-Sem-Assinatura' --dir pacote
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          arquivos=list(Path('pacote').glob('*.apk'))
+          assert len(arquivos)==1
+          with zipfile.ZipFile(arquivos[0]) as z,zipfile.ZipFile('sem-lib.apk','w') as out:
+              for info in z.infolist():
+                  if info.filename.startswith(('lib/','META-INF/')):continue
+                  out.writestr(info,z.read(info),compress_type=info.compress_type)
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -f -P 16 4 sem-lib.apk alinhado.apk
+          keytool -genkeypair -keystore qa.jks -alias qa -storepass android123 -keypass android123 -keyalg RSA -keysize 2048 -validity 3 -dname 'CN=Metrys QA' -noprompt
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks qa.jks --ks-key-alias qa --ks-pass pass:android123 --key-pass pass:android123 --out metrys-ui-qa.apk alinhado.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify metrys-ui-qa.apk
+          cat > testar-abertura.sh <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          adb install --no-incremental metrys-ui-qa.apk
+          adb logcat -c
+          adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaEstavel | tee abrir-inicial.txt
+          sleep 6
+          adb shell pidof br.com.anderflow.metrys.offline | tee pid-inicial.txt
+          adb shell screencap -p /sdcard/entrada.png
+          adb pull /sdcard/entrada.png entrada.png
+          adb shell am start -W -n br.com.anderflow.metrys.offline/.TelaOffline | tee abrir-chat.txt
+          sleep 5
+          adb shell screencap -p /sdcard/chat.png
+          adb pull /sdcard/chat.png chat.png
+          adb logcat -d -v time > diagnostico.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          log=Path('diagnostico.txt').read_text(errors='replace')
+          for p in ['entrada.png','chat.png']:
+              assert Path(p).stat().st_size>8000, 'Sem captura: '+p
+          assert Path('pid-inicial.txt').read_text().strip(), 'Tela inicial terminou'
+          for m in re.finditer('FATAL EXCEPTION',log):
+              trecho=log[m.start():m.start()+1800]
+              if 'br.com.anderflow.metrys.offline' in trecho:raise AssertionError('Excecao Metrys: '+trecho[:700])
+          print('Entrada e chat sem excecao fatal no emulador')
+          PY
+          SH
+          chmod +x testar-abertura.sh
+      - name: Executar em Android 35
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          ram-size: 3072M
+          disk-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash testar-abertura.sh
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrys-0.6.15-abertura-capturas
+          path: |
+            abrir-inicial.txt
+            abrir-chat.txt
+            pid-inicial.txt
+            diagnostico.txt
+            entrada.png
+            chat.png
+          retention-days: 5
+          if-no-files-found: ignore
