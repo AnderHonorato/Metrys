@@ -1,0 +1,31 @@
+name: Capturar referencia Claudinho (codigo MIT)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/referencia-claudinho.yml'
+permissions:
+  contents: read
+jobs:
+  capturar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Obter fonte publico original no commit fixado
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/Lu1sR0/claudinho.git referencia
+          git -C referencia checkout --detach 6e05356f5fe17761ee8fbadfd78af0eefe1d2740
+          mkdir -p captura
+          cp -r referencia/src/renderer captura/
+          cp referencia/LICENSE captura/CLAUDINHO-LICENSE.txt
+          cp referencia/README.md captura/CLAUDINHO-README.md
+          printf '%s\n' "Origem: https://github.com/Lu1sR0/claudinho" "Commit: 6e05356f5fe17761ee8fbadfd78af0eefe1d2740" "Licenca MIT — manter credito do autor" > captura/ORIGEM.txt
+          tar -czf claudinho-renderer-referencia.tar.gz -C captura .
+          sha256sum claudinho-renderer-referencia.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claudinho-renderer-referencia-mit
+          path: claudinho-renderer-referencia.tar.gz
+          retention-days: 3
