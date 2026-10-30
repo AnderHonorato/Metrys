@@ -1,0 +1,66 @@
+name: Sincronizar fontes Metrys Viva 0.6.17 no repositório
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sincronizar-metrys-viva.yml']
+permissions:
+  contents: write
+jobs:
+  versionar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Obter os mesmos fontes revisados e compilar como base
+        env:
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/af8a0755-21f0-476a-9132-1ff2a2d37616-Metrys-0.6.17-Codigo-Fonte-Visual-Claudinho.zip'
+          ZIP_SHA256: '0d20280a1b26a72aa645f89e527455cd953c5832492ff99b5e908c865b367539'
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 240 -o fonte.zip "$ZIP_URL"
+          echo "$ZIP_SHA256  fonte.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import zipfile, shutil
+          from pathlib import Path
+          with zipfile.ZipFile('fonte.zip') as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or '..' in p.parts or p.is_absolute() or i.file_size>20000000 or (i.external_attr>>16)&0o170000==0o120000:
+                      raise SystemExit('Arquivo perigoso '+i.filename)
+                  z.extract(i,'_fonte')
+          raiz=Path('_fonte/metrys-mobile')
+          destinos={
+            'android/src':'android/src',
+            'android/assets/viva':'android/assets/viva',
+            'android/assets/licencas/claudinho-MIT.txt':'android/assets/licencas/claudinho-MIT.txt',
+            'android/AndroidManifest.xml':'android/AndroidManifest.xml',
+            'scripts/compilar-apk.py':'scripts/compilar-apk.py',
+            'scripts/testar-evolucao.py':'scripts/testar-evolucao.py',
+            'docs/METRYS-VIVA-0.6.17.md':'docs/METRYS-VIVA-0.6.17.md',
+          }
+          for origem,destino in destinos.items():
+              a=raiz/origem
+              b=Path('metrys-mobile')/destino
+              b.parent.mkdir(parents=True,exist_ok=True)
+              if a.is_dir():shutil.copytree(a,b,dirs_exist_ok=True)
+              else:shutil.copy2(a,b)
+          manifesto=Path('metrys-mobile/android/AndroidManifest.xml').read_text()
+          assert 'versionCode="27"' in manifesto and 'versionName="0.6.17"' in manifesto
+          assert not list(Path('metrys-mobile').rglob('*.jks'))
+          print('Código principal, cenários e licença prontos para GitHub.')
+          PY
+      - name: Versionar implementação (sem chave privada)
+        run: |
+          set -euo pipefail
+          git config user.name 'Metrys CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add metrys-mobile/
+          if git diff --staged --quiet; then
+            echo 'Fontes já atualizados'
+          else
+            git commit -m 'feat: interface Metrys Viva 0.6.17 inspirada em Claudinho MIT'
+            git push origin HEAD:main
+          fi
