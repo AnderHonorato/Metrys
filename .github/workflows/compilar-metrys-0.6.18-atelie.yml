@@ -1,0 +1,105 @@
+name: Metrys 0.6.18 · redesenho das telas e preservacao do banco
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compilar-metrys-0.6.18-atelie.yml'
+permissions:
+  contents: read
+jobs:
+  compilar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar SDK
+        run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Baixar código 0.6.18 sem chaves privadas
+        env:
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/cc0c8721-e4b3-4a7f-a388-595772a188c1-Metrys-0.6.18-Atelie-Codigo-Fonte.zip'
+          ZIP_SHA256: '8297b743331cfb79ca33412942efb32694334cd165df05cfab33ce44aa68b718'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 240 --output codigo.zip "$ZIP_URL"
+          echo "$ZIP_SHA256  codigo.zip" | sha256sum --check
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          with zipfile.ZipFile('codigo.zip') as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or '..' in p.parts or p.is_absolute() or i.file_size>20000000 or (i.external_attr>>16)&0o170000==0o120000:
+                      raise SystemExit('Entrada inválida: '+i.filename)
+                  z.extract(i,'codigo')
+          fonte=Path('codigo/metrys-mobile')
+          for f in ('scripts/compilar-apk.py','android/AndroidManifest.xml','android/jniLibs/arm64-v8a/libmetrys.so'):
+              if not (fonte/f).is_file():raise SystemExit('Fonte ausente: '+f)
+          PY
+      - name: Incluir correção de contraste revisada no navegador
+        run: |
+          set -euo pipefail
+          cp metrys-mobile/android/assets/viva/estilo.css codigo/metrys-mobile/android/assets/viva/estilo.css
+          grep -Fq 'body.claro{color:var(--texto)' codigo/metrys-mobile/android/assets/viva/estilo.css
+      - name: Testar visual original e preservar banco/metadados Android
+        run: |
+          set -euo pipefail
+          python3 codigo/metrys-mobile/scripts/testar-atelie-0618.py
+          python3 codigo/metrys-mobile/scripts/testar-evolucao.py
+          node --check codigo/metrys-mobile/android/assets/viva/aplicativo.js
+          node --check codigo/metrys-mobile/android/assets/viva/cenarios/movimento.js
+          python3 - <<'PY'
+          from pathlib import Path
+          raiz=Path('codigo/metrys-mobile/android')
+          manifest=(raiz/'AndroidManifest.xml').read_text()
+          assert 'versionCode="28"' in manifest and 'versionName="0.6.18"' in manifest
+          assert (raiz/'res/drawable/metrys.xml').is_file()
+          assert (raiz/'assets/viva/cenarios/movimento.js').is_file()
+          assert not (raiz/'assets/viva/cenarios/engine.js').exists()
+          print('Conferência de identidade Ateliê e versão interna 28 OK')
+          PY
+      - name: Gerar pacote alinhado sem acesso à chave original
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('codigo/metrys-mobile/scripts/compilar-apk.py')
+          s=p.read_text()
+          marca=" priv=RAIZ/'android/.assinatura';"
+          if marca not in s:raise SystemExit('Trecho de assinatura não localizado')
+          s=s.split(marca,1)[0]
+          s+='\n'.join([
+            " rodar(bt/'zipalign','-f','-P','16','4',w/'base.apk',w/'alinhado.apk')",
+            " a.saida.parent.mkdir(parents=True,exist_ok=True)",
+            " shutil.copy2(w/'alinhado.apk',a.saida)",
+            " print('APK alinhado sem assinatura para operação privada.')",
+            " return",
+            "if __name__=='__main__':main()"
+          ])+'\n'
+          p.write_text(s)
+          PY
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas"
+          mkdir -p "$FERRAMENTAS/jdk-17.0.20.1+1/bin"
+          ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
+          for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
+          python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante original --saida "$GITHUB_WORKSPACE/Metrys-0.6.18-SEM-ASSINATURA.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.18-SEM-ASSINATURA.apk | grep '^package:'
+          cp "$ANDROID_HOME/build-tools/36.0.0/lib/apksigner.jar" ./apksigner-36.0.0.jar
+          cp "$ANDROID_HOME/build-tools/36.0.0/zipalign" ./zipalign-36.0.0
+          chmod +x ./zipalign-36.0.0
+          sha256sum Metrys-0.6.18-SEM-ASSINATURA.apk > pacote.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.18-UX-Sem-Assinatura
+          path: |
+            Metrys-0.6.18-SEM-ASSINATURA.apk
+            apksigner-36.0.0.jar
+            zipalign-36.0.0
+            pacote.sha256
+          retention-days: 7
+          if-no-files-found: error
