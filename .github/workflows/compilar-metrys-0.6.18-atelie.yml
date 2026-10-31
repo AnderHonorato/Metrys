@@ -42,11 +42,6 @@ jobs:
           for f in ('scripts/compilar-apk.py','android/AndroidManifest.xml','android/jniLibs/arm64-v8a/libmetrys.so'):
               if not (fonte/f).is_file():raise SystemExit('Fonte ausente: '+f)
           PY
-      - name: Incluir correção de contraste revisada no navegador
-        run: |
-          set -euo pipefail
-          cp metrys-mobile/android/assets/viva/estilo.css codigo/metrys-mobile/android/assets/viva/estilo.css
-          grep -Fq 'body.claro{color:var(--texto)' codigo/metrys-mobile/android/assets/viva/estilo.css
       - name: Testar visual original e preservar banco/metadados Android
         run: |
           set -euo pipefail
