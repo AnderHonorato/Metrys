@@ -1,0 +1,65 @@
+name: Publicar Metrys Atelie 0.6.18 no repositorio
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publicar-metrys-atelie-0618.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  sincronizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Baixar fontes ja compilados e verificar integridade
+        env:
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/cc0c8721-e4b3-4a7f-a388-595772a188c1-Metrys-0.6.18-Atelie-Codigo-Fonte.zip'
+          ZIP_SHA256: '8297b743331cfb79ca33412942efb32694334cd165df05cfab33ce44aa68b718'
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 240 -o fonte.zip "$ZIP_URL"
+          echo "$ZIP_SHA256  fonte.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import zipfile,shutil
+          from pathlib import Path
+          with zipfile.ZipFile('fonte.zip') as z:
+              for i in z.infolist():
+                  p=Path(i.filename)
+                  if not p.parts or p.parts[0]!='metrys-mobile' or p.is_absolute() or '..' in p.parts or i.file_size>20_000_000:
+                      raise SystemExit('Arquivo invalido: '+i.filename)
+                  z.extract(i,'_fonte')
+          r=Path('_fonte/metrys-mobile')
+          destino=Path('metrys-mobile')
+          substituir=[
+            'android/assets/viva','android/AndroidManifest.xml',
+            'android/res/drawable/metrys.xml',
+            'android/src/br/com/anderflow/metrys/offline/TelaViva.java',
+            'docs/METRYS-ATELIE-0.6.18.md','scripts/testar-atelie-0618.py'
+          ]
+          for item in substituir:
+              a=r/item;b=destino/item
+              assert a.exists(),item
+              if b.is_dir():shutil.rmtree(b)
+              b.parent.mkdir(parents=True,exist_ok=True)
+              if a.is_dir():shutil.copytree(a,b)
+              else:shutil.copy2(a,b)
+          manifest=(destino/'android/AndroidManifest.xml').read_text()
+          assert 'android:versionCode="28"' in manifest
+          assert 'android:versionName="0.6.18"' in manifest
+          assert (destino/'android/assets/viva/cenarios/movimento.js').is_file()
+          assert not (destino/'android/assets/viva/cenarios/engine.js').exists()
+          assert not list(destino.rglob('*.jks'))
+          print('Fontes Atelie prontos, sem credenciais privadas.')
+          PY
+          python3 metrys-mobile/scripts/testar-atelie-0618.py
+          node --check metrys-mobile/android/assets/viva/aplicativo.js
+      - name: Commit da identidade visual nova
+        run: |
+          set -euo pipefail
+          git config user.name 'Metrys CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A metrys-mobile/android/assets/viva/ metrys-mobile/android/AndroidManifest.xml metrys-mobile/android/res/drawable/metrys.xml metrys-mobile/android/src/br/com/anderflow/metrys/offline/TelaViva.java metrys-mobile/docs/METRYS-ATELIE-0.6.18.md metrys-mobile/scripts/testar-atelie-0618.py
+          if git diff --staged --quiet; then echo 'Ja atualizado';else git commit -m 'feat(ui): identidade autoral Metrys Atelie 0.6.18 com 12 atmosferas e mascote organico';git push origin HEAD:main;fi
