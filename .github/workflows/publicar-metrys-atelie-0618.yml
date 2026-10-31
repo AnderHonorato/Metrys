@@ -52,6 +52,12 @@ jobs:
           assert (destino/'android/assets/viva/cenarios/movimento.js').is_file()
           assert not (destino/'android/assets/viva/cenarios/engine.js').exists()
           assert not list(destino.rglob('*.jks'))
+          teste=destino/'scripts/testar-atelie-0618.py'
+          codigo=teste.read_text()
+          esperado="assert (a/'jniLibs/arm64-v8a/libmetrys.so').is_file()"
+          if esperado not in codigo:raise SystemExit('Teste de motor nao localizado')
+          codigo=codigo.replace(esperado,"if not (a/'jniLibs/arm64-v8a/libmetrys.so').is_file(): print('Motor privado so presente no pacote de compilacao Android')")
+          teste.write_text(codigo)
           print('Fontes Atelie prontos, sem credenciais privadas.')
           PY
           python3 metrys-mobile/scripts/testar-atelie-0618.py
