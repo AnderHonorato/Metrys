@@ -1,22 +1,22 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no" />
-<meta name="color-scheme" content="dark light" />
-<title>Metrys — seu espaço criativo</title>
-<link rel="stylesheet" href="estilo.css" />
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+ <meta name="theme-color" content="#f4f0e7">
+ <title>Metrys · Ateliê de ideias</title>
+ <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="icones-svg" aria-hidden="true">
- <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+ <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h12M4 17h16"/></symbol>
  <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></symbol>
  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
- <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c2 0 2.6-1.2 2.2-2.2-.8-2 .2-3.2 2.1-3.2h1.3A4.4 4.4 0 0 0 22 11C22 6.3 17.5 3 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="8" r="1"/></symbol>
+ <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 9h.1M12 6h.1M16 9h.1M17 14h.1"/><path d="M12 21c-3-1-3-4-1-5 3-2 9 3 10-4"/></symbol>
  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="m4 17 13-13 3 3-13 13-4 1zM14 7l3 3"/></symbol>
  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
- <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 11 18-8-8 18-2-8-8-2zM11 13l10-10"/></symbol>
+ <symbol id="i-send" viewBox="0 0 24 24"><path d="m4 12 16-8-5 16-3-6-8-2zM12 14l8-10"/></symbol>
  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/></symbol>
  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
@@ -25,66 +25,61 @@
  <symbol id="i-dislike" viewBox="0 0 24 24"><g transform="translate(24,24) rotate(180)"><path d="M7 10 12 4c2-2 2.5-.3 2.1 2.2l-.6 3.3H19a2 2 0 0 1 1.9 2.7l-2.5 6.7a2 2 0 0 1-1.9 1.3H7zM3 10h4v10H3z"/></g></symbol>
  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8a8 8 0 1 0 1 7M20 3v5h-5"/></symbol>
  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 3l-4 18"/></symbol>
- <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m10 2-.5 3-2 1L5 4 3 7l2 2v5l-2 2 2 3 2.5-2 2 1 .5 3h4l.5-3 2-1 2.5 2 2-3-2-2V9l2-2-2-3-2.5 2-2-1L14 2z"/></symbol>
+ <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 10h4l5-4v12l-5-4H4zM17 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></symbol>
  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></symbol>
  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+ <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2c.9 6.1 3.9 9.1 10 10-6.1.9-9.1 3.9-10 10-.9-6.1-3.9-9.1-10-10 6.1-.9 9.1-3.9 10-10Z"/></symbol>
+ <symbol id="i-satellite" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-30 12 12)"/></symbol>
 </svg>
 <canvas id="cenario" aria-hidden="true"></canvas>
-<div id="camadaEscurecer"></div>
+<div id="camadaEscurecer" aria-hidden="true"></div>
 <div id="interface">
  <div id="sombraLateral" hidden></div>
- <aside id="lateral" class="vidro" aria-label="Meu espaço">
-  <div class="marca-lateral"><span class="icone-metrys">M</span><strong>Metrys</strong><button class="icon-btn lateral-fechar" id="fecharLateral" aria-label="Fechar menu"><svg><use href="#i-close"/></svg></button></div>
-  <button class="acao-lateral" id="novaConversa"><svg><use href="#i-plus"/></svg> Nova conversa</button>
-  <label class="busca-lateral"><svg><use href="#i-search"/></svg><input id="buscarConversas" placeholder="Buscar conversas" autocomplete="off" /></label>
-  <div class="rotulo-secao">MEU ESPAÇO <span id="totalConversas"></span></div>
-  <div class="arvore-conversas" id="arvoreConversas"><div class="item-discreto">Suas conversas aparecerão aqui.</div></div>
-  <div class="rodape-lateral">
-   <button id="abrirTemas"><svg><use href="#i-palette"/></svg> Temas <span id="temaAtual">Galáxia Distante</span></button>
-   <button id="abrirPersonalizar"><svg><use href="#i-pencil"/></svg> Personalizar</button>
-   <button id="abrirModelos"><svg><use href="#i-settings"/></svg> Modelos e ajustes</button>
-   <button id="abrirClassico"><svg><use href="#i-more"/></svg> Interface anterior</button>
+ <aside id="lateral" class="painel-mat" aria-label="Meu espaço">
+  <div class="marca-lateral"><span class="logo-orbita"><i></i><i></i><i></i></span><div class="marca-nome"><strong>metrys<span class="ponto-marca">.</span></strong><small>ATELIÊ DE IDEIAS</small></div><button class="icon-btn lateral-fechar" id="fecharLateral" aria-label="Fechar menu"><svg><use href="#i-close"/></svg></button></div>
+  <div class="lateral-conteudo"><div class="lateral-capitulo"><span class="traco"></span> UM NOVO COMEÇO <span>01</span></div>
+   <button class="acao-lateral" id="novaConversa"><svg><use href="#i-plus"/></svg> Nova conversa <span>↗</span></button>
+   <label class="busca-lateral"><svg><use href="#i-search"/></svg><input id="buscarConversas" placeholder="Encontrar uma conversa" autocomplete="off" aria-label="Buscar conversas"/></label>
+   <div class="rotulo-secao">SEU ARQUIVO <span id="totalConversas"></span></div>
+   <nav class="arvore-conversas" id="arvoreConversas"><div class="item-discreto">O que criarmos ficará aqui.</div></nav>
+  </div>
+  <div class="rodape-lateral"><div class="lateral-capitulo"><span class="traco"></span> SUA OFICINA <span>02</span></div>
+   <button id="abrirTemas"><svg><use href="#i-palette"/></svg> Atmosferas <span id="temaAtual">Maré criativa</span></button>
+   <button id="abrirPersonalizar"><svg><use href="#i-pencil"/></svg> Estúdio visual</button>
+   <button id="abrirModelos"><svg><use href="#i-settings"/></svg> Modelos</button>
+   <button id="abrirClassico"><svg><use href="#i-more"/></svg> Modo anterior</button>
+   <div class="assinatura-rodape">FEITO PARA CRIAR <span>✳</span> v0.6.18</div>
   </div>
  </aside>
- <header class="barra-superior vidro">
-  <button id="menu" class="icon-btn" aria-label="Abrir Meu espaço"><svg><use href="#i-menu"/></svg></button>
-  <span class="marca-curta"><span class="icone-metrys">M</span> Metrys</span>
-  <div id="tituloConversa">Nova conversa</div>
+ <header class="barra-superior">
+  <button id="menu" class="icon-btn botao-abertura" aria-label="Abrir Meu espaço"><svg><use href="#i-menu"/></svg></button>
+  <div class="marca-curta"><span class="logo-orbita"><i></i><i></i><i></i></span><strong>metrys<span>.</span></strong></div>
+  <div class="separador-barra"></div>
+  <div id="tituloConversa">Um novo começo</div>
   <span class="espacador"></span>
-  <button class="icon-btn" id="temasTopo" aria-label="Selecionar tema"><svg><use href="#i-palette"/></svg></button>
-  <button class="icon-btn" id="configTopo" aria-label="Personalizar"><svg><use href="#i-pencil"/></svg></button>
+  <span id="seloAtelie">IDEIAS EM MOVIMENTO</span>
+  <button class="icon-btn" id="temasTopo" aria-label="Trocar atmosfera"><svg><use href="#i-palette"/></svg></button>
+  <button class="icon-btn" id="configTopo" aria-label="Personalizar visual"><svg><use href="#i-pencil"/></svg></button>
  </header>
  <main id="principal">
-  <div id="mensagensRolagem">
-   <div id="mensagens" class="coluna-mensagens">
-    <section id="boasVindas"><div class="mascote-centro" id="mascoteGrande"></div><h1>Boa tarde. No que vamos trabalhar?</h1><p>Escolha um começo ou traga uma ideia. O Metrys acompanha você.</p><div id="sugestoes"><button data-prompt="Crie uma página HTML moderna com animações">Criar um site</button><button data-prompt="Me ajude a entender este código passo a passo">Explicar código</button><button data-prompt="Quero planejar um projeto do zero">Planejar projeto</button></div></section>
-   </div>
-  </div>
+  <div id="mensagensRolagem"><div id="mensagens" class="coluna-mensagens">
+   <section id="boasVindas"><div class="boas-decor" aria-hidden="true"><span>✳</span><span>✳</span></div><div class="mascote-centro" id="mascoteGrande"></div><div class="boas-selo"><span class="ponto-selo"></span> UMA NOVA POSSIBILIDADE</div><h1>Ideias ganham <em>vida</em><span class="ponto-destaque">.</span></h1><p>Um lugar para transformar perguntas em descobertas, e projetos em algo que você pode tocar.</p><div id="sugestoes"><button data-prompt="Vamos criar um site original e responsivo com animações."><svg><use href="#i-spark"/></svg> Inventar um site</button><button data-prompt="Me explique este código passo a passo."><svg><use href="#i-code"/></svg> Entender um código</button><button data-prompt="Quero planejar um projeto de aplicativo."><svg><use href="#i-satellite"/></svg> Desenhar um projeto</button></div><div class="boas-assinatura"><span>01</span><i></i> COMEÇAMOS POR AQUI</div></section>
+  </div></div>
   <div id="dock">
-   <div id="andamento" class="vidro" hidden><button id="abrirPensamento" aria-expanded="false"><span id="iconePensamento" class="pulso"></span><span id="tituloPensamento">Preparando resposta…</span><span id="tempoPensamento"></span><svg><use href="#i-chevron"/></svg></button><div id="conteudoPensamento" hidden></div></div>
-   <div id="fila" class="vidro" hidden></div>
-   <div class="entrada-msg vidro">
-    <div id="anexoPendente" hidden></div>
-    <textarea id="campoMensagem" placeholder="Mensagem para o Metrys…" rows="1" maxlength="500000" aria-label="Mensagem para o Metrys"></textarea>
-    <div class="ferramentas">
-     <div class="ferramentas-esq"><button class="icon-btn" id="anexar" aria-label="Anexar arquivo"><svg><use href="#i-plus"/></svg></button><button id="modoModelo" class="botao-mini">Modelo <svg><use href="#i-chevron"/></svg></button><button class="botao-mini" id="modoRaciocinio">Padrão <svg><use href="#i-chevron"/></svg></button></div>
-     <div class="ferramentas-dir"><button id="parar" class="icon-btn" aria-label="Interromper geração" title="Interromper geração" hidden><svg><use href="#i-stop"/></svg></button><button id="som" class="icon-btn" aria-label="Ativar ou desativar sons"><svg><use href="#i-sound"/></svg></button><button id="enviar" class="enviar" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button></div>
-    </div>
-   </div>
-   <input type="file" id="selecionarArquivo" hidden accept="text/*,.txt,.md,.html,.css,.js,.ts,.json,.py,.csv,.xml,.svg,.pdf,image/*,.zip" />
+   <div id="andamento" class="painel-mat" hidden><button id="abrirPensamento" aria-expanded="false"><span id="iconePensamento" class="pulso"></span><span id="tituloPensamento">Construindo uma ideia…</span><span id="tempoPensamento"></span><svg><use href="#i-chevron"/></svg></button><div id="conteudoPensamento" hidden></div></div>
+   <div id="fila" class="painel-mat" hidden></div>
+   <div class="entrada-msg painel-mat"><div id="anexoPendente" hidden></div><textarea id="campoMensagem" placeholder="O que você imagina?" rows="1" maxlength="500000" aria-label="Mensagem para o Metrys"></textarea><div class="ferramentas"><div class="ferramentas-esq"><button class="icon-btn" id="anexar" aria-label="Anexar um arquivo"><svg><use href="#i-plus"/></svg></button><button id="modoModelo" class="botao-mini">Meu modelo <svg><use href="#i-chevron"/></svg></button><button class="botao-mini" id="modoRaciocinio"><svg><use href="#i-spark"/></svg> Explorar</button></div><div class="ferramentas-dir"><button id="parar" class="icon-btn" aria-label="Interromper geração" hidden><svg><use href="#i-stop"/></svg></button><button id="som" class="icon-btn" aria-label="Sons"><svg><use href="#i-sound"/></svg></button><button id="enviar" class="enviar" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button></div></div></div>
+   <input type="file" id="selecionarArquivo" hidden accept="text/*,.txt,.md,.html,.css,.js,.ts,.json,.py,.csv,.xml,.svg,.pdf,image/*,.zip"/>
   </div>
-  <div id="mascotePequeno" role="button" aria-label="Mascote Metrys interativo" tabindex="0"><canvas width="72" height="68" id="mascotePixel"></canvas><span id="falaMascote" hidden>Pronto para começar!</span></div>
+  <div id="mascotePequeno" role="button" aria-label="Tocar no mascote do Metrys" tabindex="0"><canvas width="92" height="90" id="mascotePixel"></canvas><span id="falaMascote" hidden>Estou por aqui.</span></div>
  </main>
 </div>
-<div id="sobreposicao" class="sobreposicao" hidden><div class="modal vidro" role="dialog" aria-modal="true" aria-labelledby="tituloModal"><header class="modal-cabecalho"><h2 id="tituloModal">Temas</h2><button id="fecharModal" class="icon-btn" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></header><div id="modalConteudo"></div></div></div>
+<div id="sobreposicao" class="sobreposicao" hidden><div class="modal painel-mat" role="dialog" aria-modal="true" aria-labelledby="tituloModal"><header class="modal-cabecalho"><div><span class="modal-etiqueta">METRYS / ATELIÊ</span><h2 id="tituloModal">Atmosferas</h2></div><button id="fecharModal" class="icon-btn" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></header><div id="modalConteudo"></div></div></div>
 <div id="aviso" role="status" aria-live="polite"></div>
-<script src="cenarios/engine.js"></script>
-<script src="cenarios/themes.js"></script>
-<script src="cenarios/themes2.js"></script>
-<script src="cenarios/themes3.js"></script>
+<script src="cenarios/movimento.js"></script>
 <script src="aplicativo.js"></script>
 </body>
 </html>

@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/** Interface viva offline: cenário ASCII, interação e conversa sobre WebView isolada. */
+/** Metrys Ateliê: interface editorial original integrada ao motor offline existente. */
 public final class TelaViva extends Activity implements ServicoOffline.Ouvidor {
  private static final int SELECIONAR_ARQUIVO=712, SALVAR_ARQUIVO=713;
  private final Handler principal=new Handler(Looper.getMainLooper());
@@ -43,9 +43,9 @@ public final class TelaViva extends Activity implements ServicoOffline.Ouvidor {
  private String salvarPendente="";
 
  @Override public void onCreate(Bundle estado){super.onCreate(estado);
-  Window janela=getWindow();janela.setStatusBarColor(0xff0c0b18);janela.setNavigationBarColor(0xff0c0b18);
+  Window janela=getWindow();janela.setStatusBarColor(0xfff5f1e8);janela.setNavigationBarColor(0xfff5f1e8);janela.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
   janela.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-  pagina=new WebView(this);pagina.setBackgroundColor(0xff101129);pagina.setLayerType(View.LAYER_TYPE_HARDWARE,null);
+  pagina=new WebView(this);pagina.setBackgroundColor(0xfff5f1e8);pagina.setLayerType(View.LAYER_TYPE_HARDWARE,null);
   WebSettings w=pagina.getSettings();w.setJavaScriptEnabled(true);w.setDomStorageEnabled(true);
   w.setAllowFileAccess(true);w.setAllowContentAccess(false);w.setAllowFileAccessFromFileURLs(false);w.setAllowUniversalAccessFromFileURLs(false);
   w.setJavaScriptCanOpenWindowsAutomatically(false);w.setSupportMultipleWindows(false);w.setLoadsImagesAutomatically(true);
