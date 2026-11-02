@@ -1,6 +1,15 @@
 /* Metrys Ateliê 0.6.18: identidade original, comportamento offline preservado. */
 'use strict';
 const $ = (id) => document.getElementById(id);
+/* A prévia React abre em HTTPS: o navegador solicita a permissão do microfone.
+   O modo de chat offline e a ponte nativa permanecem intactos. */
+document.addEventListener('DOMContentLoaded', () => {
+ const botaoVoz = document.getElementById('vozTopo');
+ botaoVoz?.addEventListener('click', () => {
+   window.location.assign('https://metrys-voice-ring.vercel.app/');
+ });
+});
+
 const elementos = Object.fromEntries(['cenario','lateral','sombraLateral','parar','menu','fecharLateral','mensagens','mensagensRolagem','boasVindas','tituloConversa','campoMensagem','enviar','arvoreConversas','totalConversas','sobreposicao','tituloModal','modalConteudo','andamento','tituloPensamento','tempoPensamento','conteudoPensamento','abrirPensamento','fila','mascotePequeno','mascotePixel','falaMascote','selecionarArquivo','anexoPendente','temaAtual','aviso','mascoteGrande','modoModelo'].map(id=>[id,$(id)]));
 const e = elementos;
 const ponte = window.Metrys || null;
