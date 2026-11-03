@@ -1,10 +1,25 @@
-# Metrys · Voice Ring (prévia React)
-Tela de voz React 19 + Vite com biblioteca oficial `voice-ring` (Libraries.dev).
+# Metrys — conversa com anel reativo de voz
+Prévia web do **Metrys Ateliê** com Voice Ring integrado à interface do chat. Abra `/` para ver o Metrys e toque no microfone no cabeçalho; o anel abre **sobre o chat**. `/anel.html` continua disponível para o laboratório isolado.
+
+## O que funciona
+- Navegação e personalização da interface Metrys Ateliê, em uma cópia dos assets da WebView Android (somente apresentação).
+- Botão de voz no cabeçalho: abre/fecha sobreposição React mantendo o histórico visual da página.
+- Anel com estados idle/listening/processing/speaking e ajustes de cor, direção, velocidade, sensibilidade, tamanho, curvatura e pausa.
+- Microfone real para intensidade do anel; fala de demonstração usando a síntese de voz do navegador.
+- Ditado com Web Speech Recognition quando disponível e inserção do texto reconhecido no campo de chat, via mensagens de mesma origem.
+- Build Vite com duas entradas, a interface principal e o laboratório de anel. HTTPS obrigatório para microfone.
+
+## Limitações
+- **Ainda não é uma nova versão do APK**. O aplicativo Android existente abre a página HTTPS; o código nativo e o motor de IA local não foram alterados nesta etapa.
+- A versão web não acessa os modelos GGUF nem as conversas privadas do Android: não é uma IA funcional no navegador.
+- O reconhecimento de voz depende da compatibilidade do navegador e pode utilizar serviços externos do provedor do navegador; não é garantidamente offline. O áudio captado pelo `useMicrophone` no anel não é enviado à nossa aplicação/backend.
+- O visualizador de fala usa nível de demonstração, não mede amplitude real da voz sintetizada.
+
+## Desenvolvimento
 ```bash
 cd voice-web
 npm install
 npm run dev
+npm run build
 ```
-O microfone só é ativado por clique e precisa de HTTPS/localhost. A tela oferece quatro estados, fala de demonstração, emoção, tema e direção simulada. **É uma prévia da interface**, ainda sem transcrição, envio de áudio, integração com o motor offline ou vínculo ao APK Android.
-
-Arquitetura atual: o Metrys Android é um app Java com WebView em `metrys-mobile/android/`, não React. Para incluir este módulo offline no APK será necessário empacotar o build web nos assets, servi-lo por uma origem confiável e integrar permissões nativas; `file://` não oferece acesso confiável a `getUserMedia`.
+Código React no `src/`, interface Ateliê copiada em `public/metrys/` e ponte web em `public/metrys/integracao-web.js`. Não sobrescrever automaticamente `metrys-mobile/android/` com esta versão: a compilação Android requer integração própria, motor local, permissões e assinatura.
