@@ -24,7 +24,7 @@ function ControleFaixa({ id, titulo, valor, minimo, maximo, passo, aoMudar, desc
   </div>;
 }
 
-export default function VoiceScreen() {
+export default function VoiceScreen({ onTexto }) {
   const mic = useMicrophone();
   const [estado, definirEstado] = useState('idle');
   const [fonte, definirFonte] = useState('microfone');
@@ -40,6 +40,9 @@ export default function VoiceScreen() {
   const [erro, definirErro] = useState('');
   const [aba, definirAba] = useState('aparencia');
   const [escutaReal, definirEscutaReal] = useState(false);
+  const [transcricao, definirTranscricao] = useState('');
+  const [reconhecendo, definirReconhecendo] = useState(false);
+  const reconhecedor = useRef(null);
   const nivelDaFala = useRef(0);
   const animacao = useRef(0);
   const timeout = useRef(0);
@@ -48,6 +51,8 @@ export default function VoiceScreen() {
   const parar = useCallback(() => {
     versao.current += 1;
     try { mic.stop?.(); } catch { /* microfone inativo */ }
+    try { reconhecedor.current?.abort?.(); } catch { /* reconhecimento inativo */ }
+    definirReconhecendo(false);
     try { window.speechSynthesis?.cancel(); } catch { /* sem síntese disponível */ }
     clearTimeout(timeout.current);
     cancelAnimationFrame(animacao.current);
@@ -59,6 +64,7 @@ export default function VoiceScreen() {
   useEffect(() => () => {
     versao.current += 1;
     try { mic.stop?.(); } catch { /* já parado */ }
+    try { reconhecedor.current?.abort?.(); } catch { /* já parado */ }
     try { window.speechSynthesis?.cancel(); } catch { /* indisponível */ }
     clearTimeout(timeout.current);
     cancelAnimationFrame(animacao.current);
@@ -134,6 +140,57 @@ export default function VoiceScreen() {
     } else {
       // Fallback visual quando o dispositivo não oferece síntese de fala.
       timeout.current = window.setTimeout(encerrar, 5800);
+    }
+  };
+
+
+  const transcreverVoz = () => {
+    const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+    definirErro('');
+    if (!Reconhecimento) {
+      definirErro('Ditado por voz não disponível neste navegador. Use o Chrome no Android ou digite a transcrição manualmente.');
+      return;
+    }
+    try {
+      reconhecedor.current?.abort?.();
+      const instancia = new Reconhecimento();
+      reconhecedor.current = instancia;
+      instancia.lang = 'pt-BR';
+      instancia.interimResults = true;
+      instancia.continuous = false;
+      instancia.maxAlternatives = 1;
+      instancia.onresult = evento => {
+        const frases = Array.from(evento.results).map(resultado => resultado[0]?.transcript || '');
+        definirTranscricao(frases.join(' ').trim());
+      };
+      instancia.onerror = evento => {
+        definirReconhecendo(false);
+        if (evento.error !== 'aborted') {
+          definirErro(evento.error === 'not-allowed'
+            ? 'Autorize o uso do microfone para transcrever sua fala.'
+            : 'Falha no ditado de voz. Confira a conexão e tente novamente.');
+        }
+      };
+      instancia.onend = () => {
+        reconhecedor.current = null;
+        definirReconhecendo(false);
+        try { mic.stop?.(); } catch { /* fluxo já encerrado */ }
+        definirEscutaReal(false);
+        definirEstado('idle');
+      };
+      // Ativa o espectro reativo enquanto o navegador transcreve o ditado.
+      if (fonte === 'microfone') {
+        Promise.resolve(mic.start()).then(() => {
+          if (reconhecedor.current === instancia) definirEscutaReal(true);
+          else mic.stop?.();
+        }).catch(() => definirEscutaReal(false));
+      }
+      instancia.start();
+      definirReconhecendo(true);
+      definirEstado('listening');
+    } catch {
+      definirReconhecendo(false);
+      definirErro('Não foi possível iniciar o reconhecimento de fala.');
     }
   };
 
@@ -239,6 +296,16 @@ export default function VoiceScreen() {
             definirTamanho(270); definirSensibilidade(.85); definirVelocidade(1); definirCurvatura(.55); definirPausado(false); definirErro('');
           }}>↺ Restaurar configurações padrão</button>
         </section>
+        {onTexto && <section className="transcricao-voz" aria-label="Ditado para o chat do Metrys">
+          <div className="transcricao-topo"><div><span className="sobretitulo">CONVERSA POR VOZ</span><h2>Fale com o Metrys</h2></div><span className="etiqueta-transcricao">WEB</span></div>
+          <p>Fale para preencher a mensagem no chat. O modelo offline responde somente no aplicativo Android.</p>
+          <button className="transcrever" type="button" onClick={transcreverVoz} disabled={reconhecendo}>
+            {reconhecendo ? '● Ouvindo seu ditado…' : '◉ Transcrever minha voz'}
+          </button>
+          <label htmlFor="fala-transcrita">Mensagem reconhecida</label>
+          <textarea id="fala-transcrita" rows="3" value={transcricao} placeholder="Sua fala aparece aqui. Você também pode escrever." onChange={e=>definirTranscricao(e.target.value)} />
+          <button className="inserir-chat" disabled={!transcricao.trim()} type="button" onClick={() => { const texto=transcricao.trim(); parar(); definirTranscricao(''); onTexto(texto); }}>Inserir no chat do Metrys ↗</button>
+        </section>}
         <p className="aviso-final">Prévia visual em React com Voice Ring. O motor de IA offline do Metrys não é acionado nesta página. Os modelos de emoção e direção da versão SwiftUI não funcionam no navegador.</p>
       </main>
       <footer>METRYS <span>·</span> EXPERIÊNCIA DE VOZ</footer>
