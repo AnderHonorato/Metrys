@@ -1,0 +1,42 @@
+
+/* Metrys: identidades vivas premium, desenhadas em Canvas 2D. */
+.premium-intro{margin:28px 0 18px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding-top:23px;border-top:1px solid var(--line)}
+.premium-intro h2{font:400 clamp(27px,4vw,39px)/1.1 Georgia,serif;letter-spacing:-.045em;margin:4px 0 8px}
+.premium-intro p{font-size:14px;color:var(--muted);max-width:570px;margin:0}
+.premium-flag{font-size:11px;letter-spacing:.07em;background:#e7dfd0;color:#724121;border:1px solid #d6bea5;padding:8px 12px;border-radius:999px;font-weight:700;white-space:nowrap}
+.card.premium{--ink:#b2622d;position:relative}
+.card.premium .stage{height:236px;background:#efe8df}
+.card.premium .stage::before{display:none}
+.card.premium .stage canvas{display:block;width:194px;height:194px;touch-action:none;cursor:crosshair}
+.card.premium .stage::after{content:"TOQUE E MOVA";position:absolute;bottom:15px;right:16px;letter-spacing:.12em;font-weight:800;font-size:9px;opacity:.5;pointer-events:none}
+.card.premium .card-content{padding-top:8px}
+.card.premium h2{margin:9px 0 8px;font-size:28px}
+.card.premium .desc{font-size:13px}
+.card.premium .status{background:#f9ede3;color:#8c491a}
+.card.premium[data-model="7"] .stage{background:radial-gradient(circle at 52% 49%,#fff8e9 0%,#efdfcd 54%,#e5d1bd 100%)}
+.card.premium[data-model="8"] .stage{background:radial-gradient(ellipse at 47% 45%,#3d302e 0%,#201b20 65%,#18191a 100%)}
+.card.premium[data-model="9"] .stage{background:radial-gradient(circle at 50%,#f5edf1,#e2d6db 72%,#d9c9c8)}
+.card.premium[data-model="10"] .stage{background:radial-gradient(circle at 48%,#f1f5e7,#d9e5d1 78%,#c7d6c1)}
+.card.premium[data-model="11"] .stage{background:radial-gradient(circle at 48%,#faf1df,#eee3d4 67%,#dfd5cb)}
+.card.premium[data-model="12"] .stage{background:radial-gradient(circle at center,#19363c,#15232f 70%,#111c27)}
+.card.premium[data-model="13"] .stage{background:radial-gradient(circle at 52% 50%,#f7f5f1,#dce4df 76%,#b3c6bd)}
+.card.premium[data-model="14"] .stage{background:linear-gradient(180deg,#e9d5c1 0%,#f0e8d8 52%,#cccfbf)}
+.card.premium .choose{transition:background .18s,border-color .18s,transform .18s}
+.card.premium .choose:hover{transform:translateY(-1px)}
+.premium-extras{margin:5px 0 24px;padding:14px 16px;border-radius:20px;background:rgba(249,244,237,.72);border:1px solid var(--line);display:flex;gap:15px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.premium-extras p{margin:0;color:var(--muted);font-size:12px;flex:1}
+.premium-extras label{display:flex;align-items:center;gap:10px;color:var(--text);font-size:12px;font-weight:700}
+.premium-extras input[type=range]{accent-color:var(--terra);width:110px}
+.premium-extras .speed{font-variant-numeric:tabular-nums;font-size:12px;min-width:33px}
+@media(max-width:520px){
+ .premium-intro{align-items:flex-start;flex-direction:column;gap:9px;margin:20px 2px 13px}
+ .premium-intro h2{font-size:27px}
+ .premium-flag{font-size:9px}
+ .card.premium .stage{height:164px}
+ .card.premium .stage canvas{width:148px;height:148px}
+ .card.premium .stage::after{font-size:8px;right:8px;bottom:8px}
+ .card.premium h2{font-size:22px}
+ .premium-extras{padding:12px 13px}
+ .premium-extras input[type=range]{width:100px}
+}
+@media(prefers-reduced-motion:reduce){.card.premium .stage canvas{animation:none}}
