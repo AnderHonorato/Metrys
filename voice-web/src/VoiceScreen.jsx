@@ -171,7 +171,20 @@ export default function VoiceScreen({ onTexto }) {
             : 'Falha no ditado de voz. Confira a conexão e tente novamente.');
         }
       };
-      instancia.onend = () => definirReconhecendo(false);
+      instancia.onend = () => {
+        reconhecedor.current = null;
+        definirReconhecendo(false);
+        try { mic.stop?.(); } catch { /* fluxo já encerrado */ }
+        definirEscutaReal(false);
+        definirEstado('idle');
+      };
+      // Ativa o espectro reativo enquanto o navegador transcreve o ditado.
+      if (fonte === 'microfone') {
+        Promise.resolve(mic.start()).then(() => {
+          if (reconhecedor.current === instancia) definirEscutaReal(true);
+          else mic.stop?.();
+        }).catch(() => definirEscutaReal(false));
+      }
       instancia.start();
       definirReconhecendo(true);
       definirEstado('listening');
