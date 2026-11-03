@@ -20,8 +20,9 @@ const icone=(nome)=>`<svg aria-hidden="true"><use href="#i-${nome}"></use></svg>
 const rascunho={textoAnexado:'',nomeAnexo:''};
 let estado={fase:'preparando',detalhe:'Preparando sua experiência…',gerando:false,modeloPronto:false,conversaId:'',nomeModelo:'Modelo offline',conversas:[],projetos:[],mensagens:[],etapas:[],filaPendente:0,tempoGeracaoMs:0,raciocinioPublicado:'',raciocinando:false,trechosGerados:0,bytes:0,total:1};
 let tituloAnterior='',ultimoDesenho='',ultimoResumo='',ultimoPensamento='',conversaAnterior='',avisoTimer=0,modalAtual='',raciocinios=ler('raciocinios',{});
-let preferencias=Object.assign({versaoVisual:3,tema:'mare',acento:null,escurecer:0,opacidade:91,desfoque:8,tamanho:15,largura:740,velocidade:1,sons:false,reduzir:false},ler('preferencias',{}));
+let preferencias=Object.assign({versaoVisual:4,tema:'organic',acento:null,escurecer:0,opacidade:91,desfoque:8,tamanho:15,largura:740,velocidade:1,sons:false,reduzir:false},ler('preferencias',{}));
 const THEMES=[
+ {id:'organic',name:'Organic · Papel',light:true,fundo:'#f5ead8',fundo2:'#ebddc5',texto:'#201e1d',texto2:'#645c50',acento:'#b2622d',acento2:'#728157',pale:'#eee7db',cartao:'#f9f4ed'},
  {id:'mare',name:'Maré criativa',light:true,fundo:'#f5f1e8',fundo2:'#eae5d8',texto:'#20373c',texto2:'#617477',acento:'#ee7859',acento2:'#298e87',pale:'#d8eee7',cartao:'#fffcf6'},
  {id:'safira',name:'Safira elétrica',light:false,fundo:'#102735',fundo2:'#162f3b',texto:'#e8f2eb',texto2:'#b3cfca',acento:'#f7a16b',acento2:'#75e6d0',pale:'#224a50',cartao:'#1a343f'},
  {id:'terracota',name:'Terracota',light:true,fundo:'#f8e5d9',fundo2:'#efd2c3',texto:'#573c38',texto2:'#856b61',acento:'#d05c42',acento2:'#7a8a66',pale:'#f5ccc1',cartao:'#fff5ed'},
@@ -36,6 +37,7 @@ const THEMES=[
  {id:'amanhecer',name:'Amanhecer',light:true,fundo:'#fcf4e9',fundo2:'#f3ddd3',texto:'#424454',texto2:'#817f8d',acento:'#ff8176',acento2:'#7398ac',pale:'#f9dddd',cartao:'#fffaf5'}
 ];
 const TEMAS_NOMES=Object.fromEntries(THEMES.map(t=>[t.id,t.name]));
+if(Number(preferencias.versaoVisual||0)<4){preferencias.versaoVisual=4;preferencias.tema='organic';preferencias.acento=null;guardar('preferencias',preferencias);}
 let atualTema=null,renderizador=null,ponteiro={x:0,y:0,speed:0},ativo=true;
 function aviso(texto){clearTimeout(avisoTimer);e.aviso.textContent=texto;e.aviso.classList.add('ativo');avisoTimer=setTimeout(()=>e.aviso.classList.remove('ativo'),2400);}
 function usarPonte(nome,...args){try{if(ponte&&typeof ponte[nome]==='function')return ponte[nome](...args);}catch(ex){aviso('Não foi possível concluir esta ação.');console.error(nome,ex);}return null;}
@@ -48,9 +50,9 @@ function aplicarPreferencias(){
  Object.entries(cores).forEach(([k,v])=>css.setProperty('--'+k,v));
  const escuro=!escolhido.light;
  const r=Math.max(.24,Math.min(.98,Number(preferencias.opacidade)/100||.91));
- css.setProperty('--vidro',escuro?`rgba(28,44,48,${r})`:`rgba(255,253,246,${r})`);
- css.setProperty('--pill',escuro?'#355052':'#e7e6db');css.setProperty('--linha',escuro?'rgba(210,244,232,.19)':'rgba(39,67,68,.16)');
- css.setProperty('--fraco',escuro?'#829e9c':'#82918c');css.setProperty('--sombra',escuro?'0 20px 48px rgba(4,10,11,.32)':'0 20px 48px rgba(24,52,51,.10)');
+ css.setProperty('--vidro',escuro?`rgba(36,32,28,${r})`:`rgba(249,244,237,${r})`);
+ css.setProperty('--pill',escuro?'#3a332d':'#eee7db');css.setProperty('--linha',escuro?'rgba(244,235,222,.22)':'rgba(32,30,29,.16)');
+ css.setProperty('--fraco',escuro?'#c0b6a5':'#645c50');css.setProperty('--sombra',escuro?'0 16px 35px rgba(13,10,9,.3)':'0 16px 35px rgba(48,35,28,.12)');
  css.setProperty('--escurecer',String((Number(preferencias.escurecer)||0)/100));
  css.setProperty('--blur',Math.max(0,Math.min(30,Number(preferencias.desfoque)||0))+'px');
  css.setProperty('--fonte',Math.max(11,Math.min(22,Number(preferencias.tamanho)||15))+'px');
@@ -182,7 +184,7 @@ function configurarEventos(){
   if(t.id==='baixarModelo'){usarPonte('baixarModelo');aviso('Download iniciado.');fecharModal();}
   if(t.id==='mudarCenario')mostrarTemas();
   if(t.id==='removerFundo'){e.cenario.style.opacity='1';e.cenario.style.background='';e.cenario.style.backgroundImage='';ativo=true;if(renderizador)renderizador.pausar(false);}
-  if(t.id==='restaurarVisual'){preferencias=Object.assign(preferencias,{tema:'mare',acento:null,escurecer:0,opacidade:91,desfoque:8,tamanho:15,largura:740});aplicarPreferencias();guardarPreferencias();mostrarPersonalizar('Interface');}
+  if(t.id==='restaurarVisual'){preferencias=Object.assign(preferencias,{tema:'organic',acento:null,escurecer:0,opacidade:91,desfoque:8,tamanho:15,largura:740});aplicarPreferencias();guardarPreferencias();mostrarPersonalizar('Interface');}
  });
  e.modalConteudo.addEventListener('input',ev=>{const alvo=ev.target,k=alvo.dataset.config;if(!k)return;preferencias[k]=alvo.type==='checkbox'?alvo.checked:alvo.type==='range'?Number(alvo.value):alvo.value;aplicarPreferencias();guardarPreferencias();if(alvo.parentElement?.lastElementChild?.tagName==='SPAN')alvo.parentElement.lastElementChild.textContent=alvo.value+(k==='opacidade'||k==='escurecer'?'%':k==='desfoque'||k==='tamanho'?'px':k==='velocidade'?'×':'px');});
  e.modalConteudo.addEventListener('change',ev=>{if(ev.target.id==='imagemFundo'){const arq=ev.target.files?.[0];if(!arq)return;if(arq.size>7_000_000){aviso('Limite de 7 MB para este fundo.');return;}const url=URL.createObjectURL(arq);e.cenario.style.backgroundImage=`url("${url}")`;e.cenario.style.backgroundSize='cover';e.cenario.style.backgroundPosition='center';e.cenario.style.opacity='1';ativo=false;if(renderizador)renderizador.pausar(true);aviso('Imagem aplicada nesta sessão.');}});
@@ -193,40 +195,86 @@ let ultimoHumor='calmo',mascoteQuadro=0,mascoteX=0,mascoteY=0,mascoteVY=0,arrast
 function definirHumor(h){ultimoHumor=h;}
 function falarMascote(fala){clearTimeout(mascoteFalaTimer);e.falaMascote.hidden=false;e.falaMascote.textContent=fala;mascoteFalaTimer=setTimeout(()=>e.falaMascote.hidden=true,2800);}
 function desenharMascote(canvas,tempo=0){
- if(!canvas)return;const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
- ctx.clearRect(0,0,w,h);const k=Math.min(w/110,h/112);ctx.save();ctx.translate(w/2,h/2+Math.sin(tempo/680)*2*k);ctx.scale(k,k);
- const movimento=ultimoHumor==='trabalhando'?Math.sin(tempo/135)*.065:Math.sin(tempo/850)*.025;
- ctx.rotate(movimento);const cor=getComputedStyle(document.documentElement);
- const agua=cor.getPropertyValue('--acento2').trim()||'#298e87';const coral=cor.getPropertyValue('--acento').trim()||'#ee7859';
- ctx.globalAlpha=.2;ctx.fillStyle='#274c50';ctx.beginPath();ctx.ellipse(0,47,31,6,0,0,7);ctx.fill();ctx.globalAlpha=1;
- // Dois pequenos satélites dão personalidade ao personagem, sem remeter a letra ou mascote existente.
- ctx.fillStyle=coral;ctx.beginPath();ctx.arc(-26,-38,9+Math.sin(tempo/500)*1,0,Math.PI*2);ctx.fill();
- ctx.fillStyle=agua;ctx.beginPath();ctx.arc(35,-26,6.2,0,Math.PI*2);ctx.fill();
- const grad=ctx.createLinearGradient(-38,-40,36,48);grad.addColorStop(0,'#b0e7da');grad.addColorStop(.45,'#65c4b4');grad.addColorStop(1,'#388e8a');
- ctx.beginPath();ctx.moveTo(-37,-11);ctx.bezierCurveTo(-47,-42,-15,-53,4,-37);ctx.bezierCurveTo(23,-51,47,-24,38,0);ctx.bezierCurveTo(48,28,21,45,0,40);ctx.bezierCurveTo(-29,51,-46,24,-37,-11);ctx.closePath();ctx.fillStyle=grad;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#296c6a';ctx.globalAlpha=.55;ctx.stroke();ctx.globalAlpha=1;
- // Marca circular como espiral expressiva na testa.
- ctx.strokeStyle='#defff4';ctx.lineWidth=2.4;ctx.lineCap='round';ctx.beginPath();ctx.arc(1,-20,11,Math.PI*.5,Math.PI*2.17);ctx.stroke();ctx.beginPath();ctx.arc(1,-20,4,0,Math.PI*1.4);ctx.stroke();
- // Olhos reagem ao ponteiro e ao estado da IA.
- const olhar=Math.max(-2.4,Math.min(2.4,(ponteiro.x-innerWidth/2)/190));
- ctx.fillStyle='#143d3f';if(ultimoHumor==='dormindo'){
-  ctx.lineWidth=3;ctx.strokeStyle='#143d3f';for(const x of [-14,15]){ctx.beginPath();ctx.moveTo(x-4,3);ctx.quadraticCurveTo(x,7,x+4,3);ctx.stroke();}
- }else{for(const x of [-14,15]){ctx.beginPath();ctx.ellipse(x+olhar,4,3.1,4.3,0,0,7);ctx.fill();}}
- ctx.strokeStyle='#194e50';ctx.lineWidth=2;ctx.beginPath();ctx.arc(1,15,6,0,Math.PI*.95);ctx.stroke();
- ctx.globalAlpha=.5;ctx.fillStyle=coral;for(const x of [-25,24]){ctx.beginPath();ctx.arc(x,14,6,0,7);ctx.fill()}
+ if(!canvas)return;
+ const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+ const t=preferencias.reduzir?0:tempo/1000;
+ const estilo=getComputedStyle(document.documentElement);
+ const tinta=estilo.getPropertyValue('--texto').trim()||'#201e1d';
+ const terra=estilo.getPropertyValue('--acento').trim()||'#b2622d';
+ const salvia=estilo.getPropertyValue('--acento2').trim()||'#728157';
+ const papel=estilo.getPropertyValue('--cartao').trim()||'#f9f4ed';
+ const k=Math.min(w/116,h/116);
+ const oscilacao=preferencias.reduzir?0:Math.sin(t*2.05)*2.4;
+ const inclinacao=preferencias.reduzir?0:Math.sin(t*1.05)*.045+(ultimoHumor==='trabalhando'?Math.sin(t*8)*.025:0);
+ ctx.clearRect(0,0,w,h);ctx.save();
+ ctx.translate(w/2,h/2+oscilacao*k);ctx.scale(k,k);
+ ctx.save();ctx.globalAlpha=.11;ctx.fillStyle=tinta;
+ ctx.beginPath();ctx.ellipse(0,48,34,5,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ // O Metrys e uma pequena dobradura viva, feita de papel e tinta.
+ ctx.rotate(inclinacao);
+ // Dobra traseira esquerda — duas abas de papel com tinta na borda.
+ ctx.fillStyle='#e8c9ab';ctx.strokeStyle=tinta;ctx.lineWidth=1.75;ctx.lineJoin='round';
+ ctx.beginPath();ctx.moveTo(-27,-23);ctx.quadraticCurveTo(-42,-48,-16,-52);
+ ctx.lineTo(-5,-30);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle=salvia;
+ ctx.beginPath();ctx.moveTo(19,-24);ctx.quadraticCurveTo(40,-45,38,-49);
+ ctx.lineTo(11,-42);ctx.lineTo(5,-28);ctx.closePath();ctx.fill();ctx.stroke();
+ // Corpo central de papel: uma silhueta pentagonal macia, nao um circulo generico.
+ ctx.shadowColor='rgba(48,35,28,.14)';ctx.shadowBlur=10;ctx.shadowOffsetY=5;
+ ctx.fillStyle=papel;ctx.strokeStyle=tinta;ctx.lineWidth=2.1;
+ ctx.beginPath();ctx.moveTo(-27,-28);ctx.quadraticCurveTo(-34,-25,-35,-13);
+ ctx.lineTo(-33,21);ctx.quadraticCurveTo(-28,36,-8,39);
+ ctx.quadraticCurveTo(8,41,25,34);ctx.quadraticCurveTo(35,28,35,11);
+ ctx.lineTo(30,-16);ctx.quadraticCurveTo(26,-30,8,-35);
+ ctx.quadraticCurveTo(-10,-40,-27,-28);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ // Recorte terracota no topo, com dobra triangulada.
+ ctx.fillStyle=terra;
+ ctx.beginPath();ctx.moveTo(-26,-27);ctx.quadraticCurveTo(-3,-40,26,-26);
+ ctx.lineTo(15,-10);ctx.lineTo(-2,-20);ctx.lineTo(-19,-10);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#e8c9ab';ctx.globalAlpha=.76;
+ ctx.beginPath();ctx.moveTo(-19,-10);ctx.lineTo(-2,-20);ctx.lineTo(2,-1);ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+ // Costura do papel e espiral propria que representa curiosidade.
+ ctx.strokeStyle=terra;ctx.lineWidth=2;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(-27,21);ctx.quadraticCurveTo(-14,29,-2,29);ctx.stroke();
+ ctx.beginPath();ctx.arc(21,24,5.5,Math.PI*.28,Math.PI*1.85);ctx.stroke();
+ // Bracinhos soltos balancam conforme o ritmo.
+ const gesto=preferencias.reduzir?0:Math.sin(t*3.1)*3;
+ ctx.strokeStyle=tinta;ctx.lineWidth=2.5;
+ ctx.beginPath();ctx.moveTo(-31,7);ctx.quadraticCurveTo(-39,11+gesto,-40,17+gesto);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(32,8);ctx.quadraticCurveTo(43,2-gesto,42,-6-gesto);ctx.stroke();
+ // Olhos acompanham o ponteiro; piscada organica a cada ~5 segundos.
+ const olhar=Math.max(-2.1,Math.min(2.1,(ponteiro.x-innerWidth/2)/240));
+ const piscando=ultimoHumor==='dormindo'||(!preferencias.reduzir&&((t+1.3)%5.7)<.14);
+ const ys=10;
+ ctx.strokeStyle=tinta;ctx.fillStyle=tinta;ctx.lineWidth=2.25;
+ for(const x of [-11,12]){
+  if(piscando){ctx.beginPath();ctx.moveTo(x-4,ys);ctx.quadraticCurveTo(x,ys+3,x+4,ys);ctx.stroke();}
+  else{ctx.beginPath();ctx.ellipse(x+olhar,ys,2.75,3.7,0,0,Math.PI*2);ctx.fill();}
+ }
+ ctx.beginPath();ctx.arc(1,17,5,0,Math.PI*.93);ctx.stroke();
+ // Bochechas discretas de terracota e pes desenhados como sombra.
+ ctx.globalAlpha=.3;ctx.fillStyle=terra;
+ for(const x of [-22,23]){ctx.beginPath();ctx.ellipse(x,18,5.5,3.2,0,0,7);ctx.fill();}
+ ctx.globalAlpha=1;ctx.strokeStyle=tinta;ctx.lineWidth=2;
+ ctx.beginPath();ctx.moveTo(-14,38);ctx.lineTo(-17,44);ctx.moveTo(14,38);ctx.lineTo(17,44);ctx.stroke();
+ // Um traço vivo flutuante, sem efeitos brilhantes ou neon.
+ ctx.save();ctx.translate(31,-37+(preferencias.reduzir?0:Math.sin(t*2.6)*3));
+ ctx.strokeStyle=salvia;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(0,6);ctx.moveTo(-6,0);ctx.lineTo(6,0);ctx.stroke();ctx.restore();
  ctx.restore();
 }
 function iniciarMascote(){
  const cv=e.mascotePixel;const animar=(t)=>{requestAnimationFrame(animar);if(t-mascoteQuadro<80)return;mascoteQuadro=t;desenharMascote(cv,t);const grande=e.mascoteGrande.querySelector('canvas');if(grande)desenharMascote(grande,t);};requestAnimationFrame(animar);
- const g=document.createElement('canvas');g.width=170;g.height=166;g.style.width='165px';g.style.height='155px';g.style.maxWidth='100%';e.mascoteGrande.appendChild(g);
+ const g=document.createElement('canvas');g.width=170;g.height=166;g.style.width='150px';g.style.height='150px';g.style.maxWidth='100%';e.mascoteGrande.appendChild(g);
  const pet=e.mascotePequeno;let comeco={x:0,y:0},arrasto={x:0,y:0},ultimo={x:0,y:0,t:0};
  pet.addEventListener('pointerdown',ev=>{arrastando=true;pet.setPointerCapture(ev.pointerId);comeco={x:ev.clientX-mascoteX,y:ev.clientY-mascoteY};arrasto={x:ev.clientX,y:ev.clientY};ultimo={x:ev.clientX,y:ev.clientY,t:performance.now()};mascoteVY=0;pet.style.transition='none';});
  pet.addEventListener('pointermove',ev=>{if(!arrastando)return;mascoteX=ev.clientX-comeco.x;mascoteY=ev.clientY-comeco.y;pet.style.transform=`translate3d(${mascoteX}px,${mascoteY}px,0) rotate(${Math.max(-24,Math.min(24,(mascoteX)/12))}deg)`;ultimo={x:ev.clientX,y:ev.clientY,t:performance.now()};});
- pet.addEventListener('pointerup',ev=>{if(!arrastando)return;arrastando=false;const mexeu=Math.hypot(ev.clientX-arrasto.x,ev.clientY-arrasto.y);if(mexeu<12){falarMascote(['Toda ideia pode crescer.','Estou aqui!','Que tal dar vida a isso?','Me conte seu próximo plano.'][Math.floor(Math.random()*4)]);tocarSom();}
+ pet.addEventListener('pointerup',ev=>{if(!arrastando)return;arrastando=false;const mexeu=Math.hypot(ev.clientX-arrasto.x,ev.clientY-arrasto.y);if(mexeu<12){falarMascote(['Uma ideia de cada vez.','Que bom te ver!','Vamos criar algo novo?','Estou por aqui para ajudar.'][Math.floor(Math.random()*4)]);tocarSom();}
   const inicio=mascoteY,comeco=performance.now();const queda=()=>{const tempo=(performance.now()-comeco)/1000;mascoteY=Math.min(0,inicio+Math.pow(tempo,2)*1200);mascoteX*=.93;pet.style.transform=`translate3d(${mascoteX}px,${mascoteY}px,0) rotate(${Math.sin(tempo*8)*12*(1-Math.min(1,tempo))}deg)`;if(mascoteY<0)requestAnimationFrame(queda);else{mascoteY=0;mascoteX=0;pet.style.transition='transform .45s cubic-bezier(.2,.85,.2,1)';pet.style.transform='translate3d(0,0,0)';}};requestAnimationFrame(queda);
  });
  pet.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();falarMascote('Vamos criar!');}});
 }
 function tocarSom(){if(!preferencias.sons)return;try{const C=window.AudioContext||window.webkitAudioContext;const audio=new C(),osc=audio.createOscillator(),gain=audio.createGain();osc.type='sine';osc.frequency.setValueAtTime(630,audio.currentTime);osc.frequency.exponentialRampToValueAtTime(930,audio.currentTime+.12);gain.gain.setValueAtTime(.05,audio.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.15);osc.connect(gain);gain.connect(audio.destination);osc.start();osc.stop(audio.currentTime+.15);setTimeout(()=>audio.close(),500);}catch(err){}}
-function testarPonte(){if(ponte){try{const salvo=usarPonte('lerPreferencias');if(salvo){const obj=JSON.parse(salvo);if(obj.versaoVisual===3)preferencias=Object.assign(preferencias,obj);}}catch(err){}usarPonte('solicitarEstado');}else{console.info('Prévia do Ateliê sem ponte Android.');}}
+function testarPonte(){if(ponte){try{const salvo=usarPonte('lerPreferencias');if(salvo){const obj=JSON.parse(salvo);if(obj.versaoVisual===4){preferencias=Object.assign(preferencias,obj);aplicarPreferencias();}}}catch(err){}usarPonte('solicitarEstado');}else{console.info('Prévia do Ateliê sem ponte Android.');}}
 function iniciar(){configurarEventos();aplicarPreferencias();iniciarCenario();iniciarMascote();testarPonte();pintarMensagens();pintarStatus();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
