@@ -1,0 +1,6 @@
+.metrys-modo{border:1px solid var(--linha);border-radius:999px;padding:6px 9px;font-weight:700;white-space:nowrap}
+.metrys-modo.ativo{background:var(--pale);color:var(--texto)}
+.campo-memoria{display:block;width:100%;background:var(--pill);border:1px solid var(--linha);border-radius:10px;padding:10px;color:var(--texto);margin:6px 0 10px}
+.memoria-nuvem{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px 0;border-bottom:1px solid var(--linha)}
+.memoria-nuvem textarea{flex:1;min-width:130px;border:1px solid var(--linha);border-radius:8px;padding:8px;color:var(--texto);background:var(--pill)}
+.memoria-nuvem button{padding:6px 8px;border:1px solid var(--linha);border-radius:8px;background:var(--cartao);color:var(--texto)}
