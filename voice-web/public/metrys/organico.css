@@ -1,0 +1,193 @@
+/* Metrys Organic 0.6.20 — identidade papel e tinta, baseada nos tokens do design system Organic.
+   Esta camada nao modifica motores online/offline nem altera o armazenamento das conversas. */
+:root{
+ --organic-neutro-100:#f9f4ed;--organic-neutro-200:#eee7db;--organic-neutro-300:#dcd3c4;
+ --organic-neutro-600:#82796a;--organic-neutro-700:#645c50;--organic-neutro-900:#2e2b25;
+ --organic-terra-600:#b2622d;--organic-terra-700:#8c491a;--organic-terra-800:#643312;
+ --organic-salvia-600:#728157;--organic-foco:#8c491a;
+ --organic-espaco-1:4px;--organic-espaco-2:8px;--organic-espaco-3:12px;
+ --organic-espaco-4:16px;--organic-espaco-5:20px;--organic-espaco-6:28px;
+ --organic-espaco-7:36px;--organic-espaco-8:44px;
+ --organic-raio-p:8px;--organic-raio-m:16px;--organic-raio-g:28px;--organic-raio-pilula:999px;
+ --organic-sombra-p:0 1px 3px rgba(46,43,37,.16);
+ --organic-sombra-m:0 4px 14px rgba(46,43,37,.13);
+ --organic-sombra-g:0 14px 38px rgba(46,43,37,.18);
+ --organic-curva:cubic-bezier(.22,.61,.36,1);
+ --organic-fonte-corpo:'Figtree','Segoe UI',system-ui,-apple-system,sans-serif;
+ --organic-fonte-titulo:'Caprasimo',Georgia,'Times New Roman',serif;
+ --organic-fonte-marca:'Caveat',Georgia,serif;
+ --organic-papel:#f5ead8;--organic-tinta:#201e1d;
+}
+*{-webkit-tap-highlight-color:transparent}
+html{font-family:var(--organic-fonte-corpo);color-scheme:light}
+body{font-family:var(--organic-fonte-corpo);font-size:16px;letter-spacing:0;color:var(--texto);background:var(--fundo)}
+body:before{display:none}
+#cenario{opacity:.23;filter:saturate(.56)}
+#interface{grid-template-columns:258px minmax(0,1fr);grid-template-rows:66px minmax(0,1fr)}
+#lateral{background:var(--fundo2);border-right:1px solid var(--linha);box-shadow:none}
+#lateral .marca-lateral{margin:22px 20px 32px}
+.logo-orbita{width:42px;height:42px;border:2px solid var(--texto);border-radius:17px;background:var(--cartao);transform:rotate(-5deg);box-shadow:var(--organic-sombra-p)}
+.logo-orbita i:nth-child(1){border:3px solid var(--acento);border-right-color:transparent;transform:rotate(40deg)}
+.logo-orbita i:nth-child(2){background:var(--acento2)}
+.marca-nome strong,.marca-curta strong{font-family:var(--organic-fonte-marca);letter-spacing:-.035em;font-size:29px;font-weight:700}
+.marca-nome small{font-size:10px;letter-spacing:.07em;text-transform:none;color:var(--texto2)}
+.lateral-conteudo{padding:0 16px}
+.lateral-capitulo,.rotulo-secao{font-size:11px;letter-spacing:.10em;color:var(--texto2);font-weight:700}
+.lateral-capitulo .traco{background:var(--acento);width:17px}
+.acao-lateral{height:48px;min-height:48px;background:var(--organic-terra-700);border-color:var(--organic-terra-700);border-radius:999px;color:#f9f4ed;font-family:var(--organic-fonte-titulo);font-weight:400;letter-spacing:-.01em;padding:0 18px;transition:background .16s,box-shadow .16s,transform .16s}
+.acao-lateral:hover{background:var(--organic-terra-800);border-color:var(--organic-terra-800);box-shadow:var(--organic-sombra-m)}
+.busca-lateral{margin:20px 3px 18px;border:1px solid var(--linha);border-radius:999px;background:var(--cartao);min-height:45px;padding:0 14px}
+.busca-lateral input{font-size:14px}
+.conversa-item{min-height:44px;border-radius:14px;color:var(--texto);font-size:13px;padding:11px 12px;transition:background .16s}
+.conversa-item:hover,.conversa-item.ativa{background:var(--pale);font-weight:700}
+.rodape-lateral{background:transparent}
+.rodape-lateral button{border-radius:999px;min-height:44px;font-size:13px;padding:9px 12px}
+.rodape-lateral button svg{color:var(--acento)}
+.rodape-lateral button:hover{background:var(--pale)}
+.assinatura-rodape{letter-spacing:.035em;font-size:10px}
+.barra-superior{background:color-mix(in srgb,var(--cartao) 84%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:0 24px;border-bottom:1px solid var(--linha);gap:12px}
+.barra-superior #tituloConversa{font-size:14px;color:var(--texto2);font-weight:600;letter-spacing:0}
+.barra-superior .separador-barra{width:1px;background:var(--linha)}
+.barra-superior #seloAtelie{letter-spacing:.065em;font-size:10px;color:var(--texto2)}
+.icon-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:999px;color:var(--texto);transition:background .16s var(--organic-curva),box-shadow .16s}
+.icon-btn:hover{background:var(--pale);box-shadow:var(--organic-sombra-p)}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,[role=button]:focus-visible{
+ outline:2.5px solid var(--organic-foco)!important;outline-offset:2px!important
+}
+#principal{background:transparent}
+#mensagensRolagem{bottom:158px}
+.coluna-mensagens{max-width:68ch;line-height:1.55;padding:24px 0 46px}
+#boasVindas{max-width:690px;margin:clamp(12px,6vh,74px) auto 0;animation:organic-entrada .5s var(--organic-curva) both}
+#boasVindas .mascote-centro{width:160px;height:150px;margin:0 0 7px}
+.boas-decor{display:none}
+.boas-selo{color:var(--acento);letter-spacing:.10em;font-size:12px;font-weight:700;margin-top:12px}
+.ponto-selo{background:var(--acento2);box-shadow:none}
+#boasVindas h1{font-family:var(--organic-fonte-titulo);font-weight:400;font-size:clamp(35px,5vw,58px);line-height:1.12;letter-spacing:-.02em;margin:16px 0 18px}
+#boasVindas h1 em{color:var(--organic-terra-700);font-style:normal}
+.ponto-destaque{color:var(--acento)}
+#boasVindas p{font-size:16px;line-height:1.55;max-width:460px;color:var(--texto2);margin-bottom:26px}
+#sugestoes{max-width:630px;gap:10px}
+#sugestoes button{min-height:44px;background:var(--cartao);border:1px solid var(--linha);padding:10px 17px;border-radius:999px;font-size:13px;box-shadow:var(--organic-sombra-p);transition:box-shadow .16s,transform .16s,border-color .16s}
+#sugestoes button:hover{transform:translateY(-1px);border-color:var(--organic-terra-700);background:var(--cartao);box-shadow:var(--organic-sombra-m)}
+#sugestoes button svg{color:var(--acento);width:19px;height:19px}
+.boas-assinatura{letter-spacing:.08em;font-size:11px;color:var(--texto2);margin-top:34px}
+.mensagem{margin-bottom:23px;animation:organic-entrada .25s var(--organic-curva) both}
+.mensagem.ia:before{content:'';width:5px;height:19px;left:-17px;top:7px;border-radius:999px;background:var(--acento)}
+.balao-usuario{background:var(--cartao);border:1px solid var(--linha);color:var(--texto);border-radius:23px 23px 8px 23px;box-shadow:var(--organic-sombra-p);padding:12px 16px}
+.corpo-resposta{line-height:1.63}
+.corpo-resposta h2,.corpo-resposta h3{font-family:var(--organic-fonte-titulo);font-size:1.12em;font-weight:400}
+.corpo-resposta a{color:var(--organic-terra-700);text-underline-offset:3px}
+.corpo-resposta blockquote,.pensamento-msg{border-color:var(--acento)}
+.corpo-resposta code:not(pre code){background:var(--pale);border-radius:8px}
+.acoes-msg{opacity:1}
+.acoes-msg button{min-width:40px;min-height:40px;border-radius:999px}
+.acoes-msg button:hover{color:var(--acento);background:var(--pale)}
+.codigo-terminal{background:#292725;color:#f6eee2;border:1px solid #55483e;border-radius:16px;box-shadow:var(--organic-sombra-m)}
+.terminal-titulo{background:#3c3833;border-color:#5a5248}
+#dock{width:min(var(--largura),calc(100% - 40px));bottom:max(14px,env(safe-area-inset-bottom));gap:10px}
+.entrada-msg{border:1px solid var(--linha);border-radius:28px;background:var(--cartao);padding:14px 16px 12px;box-shadow:var(--organic-sombra-m);transition:border-color .16s,box-shadow .16s}
+.entrada-msg:focus-within{border-color:var(--organic-terra-700);box-shadow:0 0 0 2px color-mix(in srgb,var(--acento) 13%,transparent),var(--organic-sombra-m)}
+#campoMensagem{font-size:16px;min-height:44px;line-height:1.52;max-height:190px}
+#campoMensagem:focus{outline:0!important}
+#campoMensagem::placeholder{color:var(--texto2)}
+.ferramentas{margin-top:3px;gap:8px}
+.ferramentas .icon-btn,.ferramentas #anexar{min-width:44px;min-height:44px;width:44px;height:44px;border-radius:999px;background:var(--pale);border:1px solid var(--linha)}
+.ferramentas #anexar:hover{border-color:var(--acento)}
+.botao-mini,.metrys-modo{min-height:44px;border:1px solid var(--linha);border-radius:999px;background:var(--fundo);font-size:12px;padding:0 13px;color:var(--texto);font-weight:700;max-width:none}
+.botao-mini:hover,.metrys-modo:hover{background:var(--pale)}
+.enviar{width:46px;height:46px;min-width:46px;min-height:46px;background:var(--organic-terra-700);color:#f9f4ed;border-radius:999px;box-shadow:none}
+.enviar:hover{background:var(--organic-terra-800);transform:translateY(-1px)}
+#andamento,#fila{background:var(--cartao);box-shadow:var(--organic-sombra-p);border:1px solid var(--linha);border-radius:16px}
+#andamento button{min-height:44px}
+#mascotePequeno{right:18px;bottom:175px;filter:drop-shadow(0 4px 5px rgba(46,43,37,.14))}
+#mascotePequeno canvas{width:76px;height:76px}
+.com-mensagens #mascotePequeno{opacity:.74}
+#falaMascote{background:var(--cartao);border:1px solid var(--linha);color:var(--texto);border-radius:16px 16px 4px 16px;box-shadow:var(--organic-sombra-m);padding:10px 13px;font-size:12px}
+.sobreposicao{background:rgba(29,26,23,.42)}
+.modal{background:var(--cartao);border:1px solid var(--linha);border-radius:28px;box-shadow:var(--organic-sombra-g)}
+.modal-cabecalho{padding:20px 24px 15px}
+.modal-cabecalho h2{font-family:var(--organic-fonte-titulo);font-size:28px;font-weight:400;letter-spacing:-.01em}
+.modal-etiqueta{color:var(--acento);letter-spacing:.08em}
+#modalConteudo{padding:19px 24px 28px}
+.aviso-modal{font-size:13px;color:var(--texto2);line-height:1.55}
+.abas button{min-height:44px;border:1px solid var(--linha);font-size:13px}
+.abas button.ativa{background:var(--organic-terra-700);color:#f9f4ed}
+.grupo-preferencias h3{font-family:var(--organic-fonte-titulo);font-weight:400;font-size:19px}
+.grupo-preferencias label{font-size:13px;min-height:44px}
+.grupo-preferencias input[type=range]{accent-color:var(--acento)}
+.grupo-preferencias input:not([type=range]):not([type=checkbox]):not([type=color]),.campo-memoria,.memoria-nuvem textarea{
+ min-height:44px;border:1px solid var(--linha);border-radius:16px;padding:11px 14px;background:var(--cartao);color:var(--texto);font-size:16px;
+}
+.botao-padrao{min-height:44px;border-radius:999px;background:var(--organic-terra-700);color:#f9f4ed;font-family:var(--organic-fonte-titulo);font-size:14px;padding:11px 20px}
+.botao-padrao:hover{background:var(--organic-terra-800)}
+.paletas button,.tema-item{min-height:44px;border-radius:16px}
+.tema-item.ativo{border:2px solid var(--acento);background:var(--pale)}
+#aviso{background:var(--texto);color:var(--cartao);border-radius:999px;box-shadow:var(--organic-sombra-m);font-size:13px}
+#navOrganic{display:none}
+body.tema-escuro{--organic-foco:#e2b88e;--organic-terra-700:#b77743;--organic-terra-800:#d39965;--organic-sombra-p:0 1px 3px rgba(0,0,0,.30);--organic-sombra-m:0 5px 15px rgba(0,0,0,.33);--organic-sombra-g:0 14px 38px rgba(0,0,0,.40)}
+body.tema-escuro .acao-lateral,body.tema-escuro .enviar,body.tema-escuro .botao-padrao,body.tema-escuro .abas button.ativa{color:#1b1612}
+body.tema-escuro .codigo-terminal{background:#1a1917}
+@keyframes organic-entrada{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:960px){
+ #interface{grid-template-columns:1fr;grid-template-rows:60px minmax(0,1fr)}
+ .barra-superior{padding:0 12px}
+ .barra-superior .marca-curta{display:flex}
+ .barra-superior .marca-curta strong{font-size:26px;letter-spacing:-.035em}
+ #lateral{width:min(310px,88vw);box-shadow:var(--organic-sombra-g)}
+ #principal{min-height:0}
+ .coluna-mensagens{width:min(660px,calc(100% - 34px))}
+ #dock{width:min(690px,calc(100% - 24px))}
+}
+@media(max-width:680px){
+ #interface{height:100dvh;grid-template-rows:60px minmax(0,1fr)}
+ .barra-superior #tituloConversa{font-size:12px;max-width:24%}
+ .barra-superior .icon-btn{min-width:44px;min-height:44px;width:44px;height:44px}
+ #navOrganic{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:center;
+  position:fixed;z-index:40;bottom:0;left:0;right:0;
+  height:calc(64px + env(safe-area-inset-bottom));padding:3px 6px max(3px,env(safe-area-inset-bottom));
+  background:var(--cartao);border-top:1px solid var(--linha);box-shadow:0 -3px 15px rgba(46,43,37,.07);
+ }
+ #navOrganic button{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-height:54px;min-width:44px;border:0;border-radius:16px;background:transparent;
+  color:var(--texto2);font-size:10px;font-weight:700;letter-spacing:0;
+ }
+ #navOrganic button:active,#navOrganic button:hover{background:var(--pale);color:var(--texto)}
+ #navOrganic svg{height:20px;width:20px}
+ #navOrganic button[aria-current=page]{color:var(--organic-terra-700)}
+ #mensagensRolagem{bottom:244px}
+ #dock{bottom:calc(72px + env(safe-area-inset-bottom))}
+ #boasVindas{margin:clamp(2px,3vh,26px) auto 0;padding-bottom:12px}
+ #boasVindas .mascote-centro{height:134px;width:148px;margin-bottom:1px}
+ #boasVindas h1{font-size:clamp(31px,9vw,42px);margin:12px 0}
+ #boasVindas p{font-size:14px;margin:0 0 18px;max-width:300px}
+ #boasVindas .boas-selo{font-size:10px}
+ #sugestoes{gap:7px}
+ #sugestoes button{font-size:12px;padding:8px 12px}
+ .boas-assinatura{margin-top:22px}
+ .entrada-msg{padding:10px 12px 9px;border-radius:23px}
+ #campoMensagem{font-size:16px;min-height:36px}
+ .ferramentas{flex-wrap:wrap;gap:3px}
+ .ferramentas-esq,.ferramentas-dir{gap:3px}
+ .ferramentas .icon-btn,.ferramentas #anexar{min-height:42px;min-width:42px;width:42px;height:42px}
+ .botao-mini,.metrys-modo{min-height:42px;font-size:11px;padding:0 9px}
+ .enviar{width:44px;height:44px;min-width:44px;min-height:44px}
+ #mascotePequeno{bottom:calc(227px + env(safe-area-inset-bottom));right:4px}
+ #mascotePequeno canvas{width:61px;height:61px}
+ .modal{border-radius:24px;max-height:84dvh;box-shadow:var(--organic-sombra-g)}
+ .modal-cabecalho{padding:16px 18px 13px}
+ #modalConteudo{padding:14px 18px 22px}
+ .grade-temas{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:390px){
+ #boasVindas .mascote-centro{height:116px}
+ #boasVindas h1{font-size:30px}
+ #sugestoes button{font-size:11px}
+ #modoRaciocinio{display:none}
+ #navOrganic button{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+ #cenario{display:none}
+}
