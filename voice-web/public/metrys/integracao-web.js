@@ -19,8 +19,8 @@
     }
     const titulo = document.getElementById('seloAtelie');
     if (titulo) {
-      titulo.textContent = 'PRÉVIA WEB · IA OFFLINE NO APK';
-      titulo.title = 'Esta página não acessa o motor do Metrys instalado no Android.';
+      titulo.textContent = 'METRYS ONLINE · OFFLINE NO APK';
+      titulo.title = 'Modo offline funciona no Android; modo online envia mensagens ao Kimi K3 via provedor remoto.';
     }
   }
   window.addEventListener('message', event => {
