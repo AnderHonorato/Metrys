@@ -68,14 +68,14 @@ jobs:
           ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
           for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
           python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante previa --saida "$GITHUB_WORKSPACE/Metrys-0.6.20-Organic.apk"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.20-Nuvem.apk | grep '^package:'
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Metrys-0.6.20-Nuvem.apk
-          sha256sum Metrys-0.6.20-Nuvem.apk > Metrys-0.6.20-Nuvem.sha256
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.20-Organic.apk | grep '^package:'
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Metrys-0.6.20-Organic.apk
+          sha256sum Metrys-0.6.20-Organic.apk > Metrys-0.6.20-Organic.sha256
       - uses: actions/upload-artifact@v4
         with:
           name: Metrys-0.6.20-Organic-APK
           path: |
-            Metrys-0.6.20-Nuvem.apk
-            Metrys-0.6.20-Nuvem.sha256
+            Metrys-0.6.20-Organic.apk
+            Metrys-0.6.20-Organic.sha256
           retention-days: 14
           if-no-files-found: error
