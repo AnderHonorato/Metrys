@@ -2,11 +2,12 @@
 <html lang="pt-BR">
 <head>
  <meta charset="utf-8">
- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
- <meta name="theme-color" content="#f4f0e7">
- <title>Metrys · Ateliê de ideias</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+ <meta name="theme-color" content="#f5ead8">
+ <title>Metrys · Sua IA pessoal</title>
  <link rel="stylesheet" href="estilo.css">
  <link rel="stylesheet" href="nuvem.css">
+ <link rel="stylesheet" href="organico.css">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" class="icones-svg" aria-hidden="true">
@@ -53,7 +54,7 @@
    <button id="abrirPersonalizar"><svg><use href="#i-pencil"/></svg> Estúdio visual</button>
    <button id="abrirModelos"><svg><use href="#i-settings"/></svg> Modelos</button>
    <button id="abrirClassico"><svg><use href="#i-more"/></svg> Modo anterior</button>
-   <div class="assinatura-rodape">FEITO PARA CRIAR <span>✳</span> v0.6.18</div>
+   <div class="assinatura-rodape">FEITO PARA CRIAR <span>✳</span> v0.6.20</div>
   </div>
  </aside>
  <header class="barra-superior">
@@ -69,22 +70,29 @@
  </header>
  <main id="principal">
   <div id="mensagensRolagem"><div id="mensagens" class="coluna-mensagens">
-   <section id="boasVindas"><div class="boas-decor" aria-hidden="true"><span>✳</span><span>✳</span></div><div class="mascote-centro" id="mascoteGrande"></div><div class="boas-selo"><span class="ponto-selo"></span> UMA NOVA POSSIBILIDADE</div><h1>Ideias ganham <em>vida</em><span class="ponto-destaque">.</span></h1><p>Um lugar para transformar perguntas em descobertas, e projetos em algo que você pode tocar.</p><div id="sugestoes"><button data-prompt="Vamos criar um site original e responsivo com animações."><svg><use href="#i-spark"/></svg> Inventar um site</button><button data-prompt="Me explique este código passo a passo."><svg><use href="#i-code"/></svg> Entender um código</button><button data-prompt="Quero planejar um projeto de aplicativo."><svg><use href="#i-satellite"/></svg> Desenhar um projeto</button></div><div class="boas-assinatura"><span>01</span><i></i> COMEÇAMOS POR AQUI</div></section>
+   <section id="boasVindas"><div class="boas-decor" aria-hidden="true"><span>✳</span><span>✳</span></div><div class="mascote-centro" id="mascoteGrande"></div><div class="boas-selo"><span class="ponto-selo"></span> SEU ESPAÇO DE IDEIAS</div><h1>Olá, eu sou o <em>Metrys</em><span class="ponto-destaque">.</span></h1><p>Vamos pensar, aprender e transformar suas ideias em projetos de verdade.</p><div id="sugestoes"><button data-prompt="Vamos criar um site original e responsivo com animações."><svg><use href="#i-spark"/></svg> Inventar um site</button><button data-prompt="Me explique este código passo a passo."><svg><use href="#i-code"/></svg> Entender um código</button><button data-prompt="Quero planejar um projeto de aplicativo."><svg><use href="#i-satellite"/></svg> Desenhar um projeto</button></div><div class="boas-assinatura"><span>01</span><i></i> TUDO COMEÇA COM UMA CONVERSA</div></section>
   </div></div>
   <div id="dock">
    <div id="andamento" class="painel-mat" hidden><button id="abrirPensamento" aria-expanded="false"><span id="iconePensamento" class="pulso"></span><span id="tituloPensamento">Construindo uma ideia…</span><span id="tempoPensamento"></span><svg><use href="#i-chevron"/></svg></button><div id="conteudoPensamento" hidden></div></div>
    <div id="fila" class="painel-mat" hidden></div>
-   <div class="entrada-msg painel-mat"><div id="anexoPendente" hidden></div><textarea id="campoMensagem" placeholder="O que você imagina?" rows="1" maxlength="500000" aria-label="Mensagem para o Metrys"></textarea><div class="ferramentas"><div class="ferramentas-esq"><button class="icon-btn" id="anexar" aria-label="Anexar um arquivo"><svg><use href="#i-plus"/></svg></button><button id="modoModelo" class="botao-mini">Meu modelo <svg><use href="#i-chevron"/></svg></button><button class="botao-mini" id="modoRaciocinio"><svg><use href="#i-spark"/></svg> Explorar</button></div><div class="ferramentas-dir"><button id="parar" class="icon-btn" aria-label="Interromper geração" hidden><svg><use href="#i-stop"/></svg></button><button id="som" class="icon-btn" aria-label="Sons"><svg><use href="#i-sound"/></svg></button><button id="enviar" class="enviar" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button></div></div></div>
+   <div class="entrada-msg painel-mat"><div id="anexoPendente" hidden></div><textarea id="campoMensagem" placeholder="Converse com o Metrys..." rows="1" maxlength="500000" aria-label="Mensagem para o Metrys"></textarea><div class="ferramentas"><div class="ferramentas-esq"><button class="icon-btn" id="anexar" aria-label="Anexar um arquivo"><svg><use href="#i-plus"/></svg></button><button id="modoModelo" class="botao-mini">Meu modelo <svg><use href="#i-chevron"/></svg></button><button class="botao-mini" id="modoRaciocinio"><svg><use href="#i-spark"/></svg> Explorar</button></div><div class="ferramentas-dir"><button id="parar" class="icon-btn" aria-label="Interromper geração" hidden><svg><use href="#i-stop"/></svg></button><button id="som" class="icon-btn" aria-label="Sons"><svg><use href="#i-sound"/></svg></button><button id="enviar" class="enviar" aria-label="Enviar mensagem"><svg><use href="#i-send"/></svg></button></div></div></div>
    <input type="file" id="selecionarArquivo" hidden accept="text/*,.txt,.md,.html,.css,.js,.ts,.json,.py,.csv,.xml,.svg,.pdf,image/*,.zip"/>
   </div>
   <div id="mascotePequeno" role="button" aria-label="Tocar no mascote do Metrys" tabindex="0"><canvas width="92" height="90" id="mascotePixel"></canvas><span id="falaMascote" hidden>Estou por aqui.</span></div>
  </main>
 </div>
+<nav id="navOrganic" aria-label="Navegação principal">
+  <button type="button" id="navHistorico" aria-label="Abrir conversas"><svg><use href="#i-menu"/></svg><span>Conversas</span></button>
+  <button type="button" id="navNova" aria-label="Nova conversa"><svg><use href="#i-plus"/></svg><span>Nova</span></button>
+  <button type="button" id="navModo" aria-label="Alternar online e offline"><svg><use href="#i-satellite"/></svg><span>Modo</span></button>
+  <button type="button" id="navVisual" aria-label="Aparência do Metrys"><svg><use href="#i-palette"/></svg><span>Visual</span></button>
+</nav>
 <div id="sobreposicao" class="sobreposicao" hidden><div class="modal painel-mat" role="dialog" aria-modal="true" aria-labelledby="tituloModal"><header class="modal-cabecalho"><div><span class="modal-etiqueta">METRYS / ATELIÊ</span><h2 id="tituloModal">Atmosferas</h2></div><button id="fecharModal" class="icon-btn" aria-label="Fechar"><svg><use href="#i-close"/></svg></button></header><div id="modalConteudo"></div></div></div>
 <div id="aviso" role="status" aria-live="polite"></div>
 <script src="cenarios/movimento.js"></script>
 <script src="aplicativo.js"></script>
 <script src="nuvem.js"></script>
+<script src="organico-nav.js"></script>
 <script src="integracao-web.js"></script>
 </body>
 </html>
