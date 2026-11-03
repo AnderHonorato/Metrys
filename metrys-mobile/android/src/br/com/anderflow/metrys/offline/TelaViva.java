@@ -36,6 +36,8 @@ public final class TelaViva extends Activity implements ServicoOffline.Ouvidor {
  private static final int SELECIONAR_ARQUIVO=712, SALVAR_ARQUIVO=713;
  private final Handler principal=new Handler(Looper.getMainLooper());
  private final ExecutorService tarefas=Executors.newSingleThreadExecutor();
+ private final ExecutorService tarefasNuvem=Executors.newSingleThreadExecutor();
+ private volatile java.util.concurrent.Future<?> consultaNuvem;
  private volatile ServicoOffline servico;
  private volatile boolean paginaPronta=false,emPrimeiroPlano=false;
  private volatile EstadoOffline aguardando;
@@ -67,7 +69,7 @@ public final class TelaViva extends Activity implements ServicoOffline.Ouvidor {
  }
  @Override public void onStart(){super.onStart();emPrimeiroPlano=true;ServicoOffline s=servico;if(s!=null)tarefas.execute(()->{try{s.observar(this);}catch(Throwable erro){informarErro(erro);}});}
  @Override public void onStop(){emPrimeiroPlano=false;ServicoOffline s=servico;if(s!=null)tarefas.execute(()->s.remover(this));super.onStop();}
- @Override public void onDestroy(){paginaPronta=false;emPrimeiroPlano=false;if(pagina!=null){pagina.removeJavascriptInterface("Metrys");pagina.stopLoading();pagina.destroy();pagina=null;}tarefas.shutdownNow();super.onDestroy();}
+ @Override public void onDestroy(){paginaPronta=false;emPrimeiroPlano=false;if(pagina!=null){pagina.removeJavascriptInterface("Metrys");pagina.stopLoading();pagina.destroy();pagina=null;}tarefas.shutdownNow();if(consultaNuvem!=null)consultaNuvem.cancel(true);tarefasNuvem.shutdownNow();super.onDestroy();}
  @Override public void mudou(EstadoOffline novo){aguardando=novo;enviarEstado(novo);}
  private void enviarEstado(EstadoOffline s){if(!paginaPronta||pagina==null)return;try{JSONObject dado=new JSONObject();
   dado.put("fase",s.fase);dado.put("detalhe",s.detalhe);dado.put("gerando",s.gerando);dado.put("modeloPronto",s.modeloPronto);dado.put("nomeModelo",s.nomeModelo);dado.put("conversaId",s.conversaId);
@@ -99,6 +101,47 @@ public final class TelaViva extends Activity implements ServicoOffline.Ouvidor {
  @Override public void onBackPressed(){if(paginaPronta&&pagina!=null){pagina.evaluateJavascript("(function(){if(!document.getElementById('sobreposicao').hidden){document.getElementById('fecharModal').click();return true;}if(document.body.classList.contains('lateral-aberta')){document.getElementById('fecharLateral').click();return true;}return false;})()",resultado->{if(!"true".equals(resultado))TelaViva.super.onBackPressed();});}else super.onBackPressed();}
 
  public final class PonteAndroid {
+  /** Token nunca chega ao JavaScript depois de salvo no Android Keystore. */
+  @JavascriptInterface public boolean nuvemSalvarToken(String token){
+   return MetrysNuvem.salvarToken(getApplicationContext(),token);
+  }
+  @JavascriptInterface public boolean nuvemTemToken(){
+   return MetrysNuvem.temToken(getApplicationContext());
+  }
+  @JavascriptInterface public void nuvemApagarToken(){
+   MetrysNuvem.apagarToken(getApplicationContext());
+  }
+  @JavascriptInterface public void nuvemCancelar(){
+   java.util.concurrent.Future<?> atual=consultaNuvem;
+   if(atual!=null)atual.cancel(true);
+  }
+  @JavascriptInterface public void nuvemEnviar(String pacote){
+   if(pacote==null||pacote.length()>52000)return;
+   final String id;
+   try{
+    JSONObject entrada=new JSONObject(pacote);
+    id=entrada.optString("id","");
+    if(id.length()<3||id.length()>100||entrada.optJSONArray("mensagens")==null)return;
+   }catch(Exception erro){return;}
+   java.util.concurrent.Future<?> antiga=consultaNuvem;
+   if(antiga!=null)antiga.cancel(true);
+   consultaNuvem=tarefasNuvem.submit(()->{
+    JSONObject retorno=new JSONObject();
+    try{
+     retorno.put("id",id);
+     retorno.put("texto",MetrysNuvem.perguntar(getApplicationContext(),pacote));
+    }catch(Exception erro){
+     try{
+      retorno.put("id",id);
+      retorno.put("erro",erro.getMessage()==null?"Falha na consulta remota.":erro.getMessage());
+     }catch(Exception ignorado){}
+    }
+    String js="window.receberNuvem("+retorno.toString()+")";
+    principal.post(()->{
+     if(paginaPronta&&pagina!=null)pagina.evaluateJavascript(js,null);
+    });
+   });
+  }
   @JavascriptInterface public void solicitarEstado(){TelaViva.this.solicitarEstado();}
   @JavascriptInterface public void enviar(String texto){if(texto==null||texto.trim().isEmpty())return;final String msg=texto.length()>500000?texto.substring(0,500000):texto;executar(s->s.enviar(msg));}
   @JavascriptInterface public void novaConversa(){executar(ServicoOffline::novaConversa);}
