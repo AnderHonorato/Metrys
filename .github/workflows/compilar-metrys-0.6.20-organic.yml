@@ -1,0 +1,81 @@
+name: Metrys 0.6.20 · APK Organic online + offline
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compilar-metrys-0.6.20-organic.yml'
+      - 'metrys-mobile/android/**'
+permissions:
+  contents: read
+jobs:
+  compilar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Preparar SDK do Android
+        run: sdkmanager --install 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Recuperar dependencias binarias da base 0.6.18
+        env:
+          ZIP_URL: 'https://56d884c7-9ff8-4227-a875-7f625826c1a4.sandbox.floot.app/_cdn/static/cc0c8721-e4b3-4a7f-a388-595772a188c1-Metrys-0.6.18-Atelie-Codigo-Fonte.zip'
+          ZIP_SHA256: '8297b743331cfb79ca33412942efb32694334cd165df05cfab33ce44aa68b718'
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --max-time 240 -o codigo.zip "$ZIP_URL"
+          echo "$ZIP_SHA256  codigo.zip" | sha256sum --check
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          with zipfile.ZipFile('codigo.zip') as z:
+              for entrada in z.infolist():
+                  p=Path(entrada.filename)
+                  tipo=(entrada.external_attr>>16)&0o170000
+                  if not p.parts or p.parts[0]!='metrys-mobile' or p.is_absolute() or '..' in p.parts or entrada.file_size>20_000_000 or tipo==0o120000:
+                      raise RuntimeError('Arquivo inseguro no ZIP: '+entrada.filename)
+                  z.extract(entrada,'codigo')
+          raiz=Path('codigo/metrys-mobile')
+          for caminho in ('scripts/compilar-apk.py','android/jniLibs/arm64-v8a/libmetrys.so','base/Metrys-Mobile-0.4.1.apk'):
+              assert (raiz/caminho).is_file(), caminho
+          PY
+      - name: Usar codigos atuais do GitHub - nunca os do ZIP antigo
+        run: |
+          set -euo pipefail
+          origem=metrys-mobile/android
+          destino=codigo/metrys-mobile/android
+          cp "$origem/AndroidManifest.xml" "$destino/AndroidManifest.xml"
+          cp "$origem/src/br/com/anderflow/metrys/offline/TelaViva.java" "$destino/src/br/com/anderflow/metrys/offline/TelaViva.java"
+          cp "$origem/src/br/com/anderflow/metrys/offline/MetrysNuvem.java" "$destino/src/br/com/anderflow/metrys/offline/MetrysNuvem.java"
+          cp -R "$origem/assets/viva/." "$destino/assets/viva/"
+          grep -q 'versionName="0.6.20"' "$destino/AndroidManifest.xml"
+          grep -q 'nuvemEnviar' "$destino/src/br/com/anderflow/metrys/offline/TelaViva.java"
+          grep -q 'nuvem.js' "$destino/assets/viva/index.html"
+          node --check "$destino/assets/viva/aplicativo.js"
+          node --check "$destino/assets/viva/nuvem.js"
+          node --check "$destino/assets/viva/organico-nav.js"
+          test -s "$destino/assets/viva/organico.css"
+          grep -q "organico.css" "$destino/assets/viva/index.html"
+      - name: Gerar APK instalavel de teste assinado
+        run: |
+          set -euo pipefail
+          FERRAMENTAS="$RUNNER_TEMP/ferramentas"
+          mkdir -p "$FERRAMENTAS/jdk-17.0.20.1+1/bin"
+          ln -s "$ANDROID_HOME" "$FERRAMENTAS/sdk"
+          for comando in java javac keytool; do ln -s "$(command -v "$comando")" "$FERRAMENTAS/jdk-17.0.20.1+1/bin/$comando"; done
+          python3 codigo/metrys-mobile/scripts/compilar-apk.py --ferramentas "$FERRAMENTAS" --variante previa --saida "$GITHUB_WORKSPACE/Metrys-0.6.20-Organic.apk"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging Metrys-0.6.20-Nuvem.apk | grep '^package:'
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose Metrys-0.6.20-Nuvem.apk
+          sha256sum Metrys-0.6.20-Nuvem.apk > Metrys-0.6.20-Nuvem.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Metrys-0.6.20-Organic-APK
+          path: |
+            Metrys-0.6.20-Nuvem.apk
+            Metrys-0.6.20-Nuvem.sha256
+          retention-days: 14
+          if-no-files-found: error
