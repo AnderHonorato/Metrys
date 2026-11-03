@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5ead8">
-<meta name="description" content="Seis identidades animadas em SVG e CSS para escolher a aparência do Metrys.">
+<meta name="description" content="Quatorze identidades animadas em SVG, CSS e Canvas para escolher a aparência do Metrys.">
 <title>Metrys · Laboratório de agentes animados</title>
 <style>
 :root{--bg:#f5ead8;--card:#f9f4ed;--text:#201e1d;--muted:#645c50;--line:#dcd3c4;--terra:#b2622d;--deep:#8c491a;--olive:#728157;--pace:1;--pulse:.35;--curve:cubic-bezier(.22,.61,.36,1)}
@@ -126,13 +126,14 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
 @media(max-width:520px){header{padding:18px 16px 0}main{padding:0 13px 90px}.grid{gap:9px}.card{border-radius:19px}.stage{height:153px}.stage svg{height:144px;width:144px}.stage:before{inset:10px;border-radius:14px}.blob-stack{transform:scale(.8)}.pulse-bars{transform:scale(.76)}.card-content{padding:0 12px 14px}.card h2{font-size:21px}.desc{font-size:12px;min-height:90px;margin-bottom:9px}.controls{gap:7px}.controls strong{width:100%}.state-btn{font-size:12px;padding:8px 11px}.choose{font-size:12px;min-height:44px}.eyebrow{margin-top:22px}.num{font-size:10px}.status{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:0ms!important}}
 </style>
+<link rel="stylesheet" href="laboratorio-premium.css">
 </head>
 <body data-state="ocioso">
 <header>
  <a class="brand" href="/metrys/"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><ellipse cx="12" cy="12" rx="10" ry="5" transform="rotate(-35 12 12)"/></svg></span>metrys<span style="color:#b2622d">.</span></a>
- <div class="eyebrow">LABORATÓRIO VISUAL · 6 MODELOS ORIGINAIS</div>
+ <div class="eyebrow">LABORATÓRIO VISUAL · 14 MODELOS ORIGINAIS</div>
  <h1>Escolha a <em>identidade viva</em> do Metrys.</h1>
- <p class="intro">São seis modelos feitos com SVG e CSS, sem imagens estáticas. Mude os estados abaixo para ver como cada agente reage ao ouvir, pensar e falar. Nenhum substitui o personagem atual até você escolher.</p>
+ <p class="intro">São quatorze modelos animados em SVG, CSS e Canvas, sem imagens estáticas. Mude os estados abaixo para ver como cada agente reage ao ouvir, pensar e falar. Nenhum substitui o personagem atual até você escolher. <a href="#novos-modelos">Ir aos 8 novos modelos ↓</a></p>
  <div class="controls" role="group" aria-label="Estado da animação">
   <strong>Testar estado:</strong>
   <button class="state-btn" data-state="ocioso" aria-pressed="true">Em repouso</button>
@@ -189,9 +190,75 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
    <div class="stage"><span class="halo"></span><div class="pulse-bars" role="img" aria-label="Pulso Sonoro: onze linhas que se movem como uma onda de voz"><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i><i class="bar"></i></div></div>
    <div class="card-content"><div class="card-top"><span class="num">06 · VOZ</span><span class="status">Código puro</span></div><h2>Pulso Sonoro</h2><p class="desc">Forma mais minimalista: barras que respiram, escutam e respondem como uma voz viva.</p><button class="choose" type="button">Escolher 06</button></div>
   </article>
+ <section class="premium-intro" id="novos-modelos" style="grid-column:1/-1" aria-label="Novos modelos premium">
+    <div><div class="eyebrow" style="margin:0 0 7px">NOVA COLEÇÃO · MODELOS 07—14</div>
+    <h2>Mais vida. Mais personalidade.</h2>
+    <p>Oito novas identidades generativas, desenhadas quadro a quadro em Canvas. Arraste o dedo sobre cada agente e alterne os estados no topo para ver a reação.</p></div>
+    <span class="premium-flag">8 NOVOS MODELOS ANIMADOS</span>
+  </section>
+  <div class="premium-extras" style="grid-column:1/-1">
+    <p>Não são fotos, imagens ou GIFs: são desenhos vetoriais procedurais que evoluem em tempo real. Cor, luz e velocidade mudam em cada estado.</p>
+    <label for="premium-velocidade">Velocidade <input type="range" id="premium-velocidade" min="0.2" max="2.5" step="0.1" value="1" /><span id="premium-velocidade-valor" class="speed">1.0×</span></label>
+  </div>
+
+  <article class="card premium" data-model="7" data-name="Halo Solar">
+   <div class="stage"><canvas data-art="7" width="194" height="194" role="img" aria-label="Halo Solar, animação generativa de luz em camadas" tabindex="0">Animação do agente Halo Solar</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">07 · HALO</span><span class="status">LUMINOSO</span></div>
+   <h2>Halo Solar</h2><p class="desc">Esferas de porcelana luminosa, halos inclinados, partículas orbitais e um núcleo que respira.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 7: Halo Solar">Escolher 07</button></div>
+  </article>
+
+  <article class="card premium" data-model="8" data-name="Eclipse de Seda">
+   <div class="stage"><canvas data-art="8" width="194" height="194" role="img" aria-label="Eclipse de Seda, animação generativa de luz e mistério" tabindex="0">Animação do agente Eclipse de Seda</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">08 · ECLIPSE</span><span class="status">NOTURNO</span></div>
+   <h2>Eclipse de Seda</h2><p class="desc">Um núcleo escuro envolvido por arcos de cobre iluminados. Sofisticado e cinematográfico.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 8: Eclipse de Seda">Escolher 08</button></div>
+  </article>
+
+  <article class="card premium" data-model="9" data-name="Aurora de Névoa">
+   <div class="stage"><canvas data-art="9" width="194" height="194" role="img" aria-label="Aurora de Névoa, animação generativa de fluido e delicado" tabindex="0">Animação do agente Aurora de Névoa</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">09 · NÉVOA</span><span class="status">ETÉREO</span></div>
+   <h2>Aurora de Névoa</h2><p class="desc">Véus translúcidos mudam de forma com partículas macias e luz rosada em movimento.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 9: Aurora de Névoa">Escolher 09</button></div>
+  </article>
+
+  <article class="card premium" data-model="10" data-name="Flor de Energia">
+   <div class="stage"><canvas data-art="10" width="194" height="194" role="img" aria-label="Flor de Energia, animação generativa de geometria orgânica" tabindex="0">Animação do agente Flor de Energia</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">10 · FLORAL</span><span class="status">VIVO</span></div>
+   <h2>Flor de Energia</h2><p class="desc">Dez pétalas cinéticas se abrem, giram em conjunto e respondem à intensidade da IA.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 10: Flor de Energia">Escolher 10</button></div>
+  </article>
+
+  <article class="card premium" data-model="11" data-name="Infinito Líquido">
+   <div class="stage"><canvas data-art="11" width="194" height="194" role="img" aria-label="Infinito Líquido, animação generativa de identidade contínua" tabindex="0">Animação do agente Infinito Líquido</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">11 · INFINITO</span><span class="status">ELEGANTE</span></div>
+   <h2>Infinito Líquido</h2><p class="desc">Uma fita em forma de infinito, com reflexos que percorrem o traço como corrente de luz.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 11: Infinito Líquido">Escolher 11</button></div>
+  </article>
+
+  <article class="card premium" data-model="12" data-name="Seda Sonora">
+   <div class="stage"><canvas data-art="12" width="194" height="194" role="img" aria-label="Seda Sonora, animação generativa de voz visual" tabindex="0">Animação do agente Seda Sonora</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">12 · SONORA</span><span class="status">IMERSIVO</span></div>
+   <h2>Seda Sonora</h2><p class="desc">Treze filamentos de luz se deformam como ondas sonoras ao ouvir, pensar e falar.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 12: Seda Sonora">Escolher 12</button></div>
+  </article>
+
+  <article class="card premium" data-model="13" data-name="Opala Sináptica">
+   <div class="stage"><canvas data-art="13" width="194" height="194" role="img" aria-label="Opala Sináptica, animação generativa de inteligência cristalina" tabindex="0">Animação do agente Opala Sináptica</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">13 · CRISTAL</span><span class="status">PREMIUM</span></div>
+   <h2>Opala Sináptica</h2><p class="desc">Facetas translúcidas e camadas geométricas rotativas formam uma joia neural viva.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 13: Opala Sináptica">Escolher 13</button></div>
+  </article>
+
+  <article class="card premium" data-model="14" data-name="Horizonte Vivo">
+   <div class="stage"><canvas data-art="14" width="194" height="194" role="img" aria-label="Horizonte Vivo, animação generativa de poesia tecnológica" tabindex="0">Animação do agente Horizonte Vivo</canvas></div>
+   <div class="card-content"><div class="card-top"><span class="num">14 · PAISAGEM</span><span class="status">SERENO</span></div>
+   <h2>Horizonte Vivo</h2><p class="desc">Um sol luminoso atravessa linhas onduladas como uma paisagem abstrata que respira.</p>
+   <button class="choose" type="button" aria-label="Escolher modelo 14: Horizonte Vivo">Escolher 14</button></div>
+  </article>
  </div>
  <footer><div><div id="chosen" role="status" aria-live="polite">Nenhum modelo selecionado</div><div>Selecione um modelo para continuar.</div></div><button id="copy" type="button" disabled>Copiar minha escolha</button></footer>
- <p class="note">Prévia experimental: os seis agentes são animações reais em código, não GIFs, vídeos ou imagens geradas. A escolha nesta página não altera automaticamente o Metrys instalado.</p>
+ <p class="note">Prévia experimental: os quatorze agentes são animações reais em código, não GIFs, vídeos ou imagens geradas. A escolha nesta página não altera automaticamente o Metrys instalado.</p>
 </main>
 <script>
 (function(){
@@ -230,5 +297,6 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
   }catch(_){}
 })();
 </script>
+<script src="laboratorio-premium.js" defer></script>
 </body>
 </html>
