@@ -1,5 +1,5 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import VoiceScreen from './VoiceScreen.jsx';
+import MetrysIntegrado from './MetrysIntegrado.jsx';
 import './estilo.css';
-createRoot(document.getElementById('root')).render(<React.StrictMode><VoiceScreen /></React.StrictMode>);
+createRoot(document.getElementById('root')).render(<React.StrictMode><MetrysIntegrado /></React.StrictMode>);
