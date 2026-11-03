@@ -298,7 +298,7 @@ export default function VoiceScreen({ onTexto }) {
         </section>
         {onTexto && <section className="transcricao-voz" aria-label="Ditado para o chat do Metrys">
           <div className="transcricao-topo"><div><span className="sobretitulo">CONVERSA POR VOZ</span><h2>Fale com o Metrys</h2></div><span className="etiqueta-transcricao">WEB</span></div>
-          <p>Fale para preencher a mensagem no chat. O modelo offline responde somente no aplicativo Android.</p>
+          <p>Fale para preencher a mensagem no chat. O modo offline responde no APK Android. No site, ative Online para conversar usando o modelo remoto.</p>
           <button className="transcrever" type="button" onClick={transcreverVoz} disabled={reconhecendo}>
             {reconhecendo ? '● Ouvindo seu ditado…' : '◉ Transcrever minha voz'}
           </button>
@@ -306,7 +306,7 @@ export default function VoiceScreen({ onTexto }) {
           <textarea id="fala-transcrita" rows="3" value={transcricao} placeholder="Sua fala aparece aqui. Você também pode escrever." onChange={e=>definirTranscricao(e.target.value)} />
           <button className="inserir-chat" disabled={!transcricao.trim()} type="button" onClick={() => { const texto=transcricao.trim(); parar(); definirTranscricao(''); onTexto(texto); }}>Inserir no chat do Metrys ↗</button>
         </section>}
-        <p className="aviso-final">Prévia visual em React com Voice Ring. O motor de IA offline do Metrys não é acionado nesta página. Os modelos de emoção e direção da versão SwiftUI não funcionam no navegador.</p>
+        <p className="aviso-final">O anel de voz controla o ditado no chat. O motor offline não executa no navegador; o modo online depende da API configurada. Os modelos de emoção e direção da versão SwiftUI não funcionam no navegador.</p>
       </main>
       <footer>METRYS <span>·</span> EXPERIÊNCIA DE VOZ</footer>
     </div>
