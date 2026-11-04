@@ -127,13 +127,14 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:0ms!important}}
 </style>
 <link rel="stylesheet" href="laboratorio-premium.css">
+<link rel="stylesheet" href="laboratorio-eventos.css">
 </head>
 <body data-state="ocioso">
 <header>
  <a class="brand" href="/metrys/"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><ellipse cx="12" cy="12" rx="10" ry="5" transform="rotate(-35 12 12)"/></svg></span>metrys<span style="color:#b2622d">.</span></a>
  <div class="eyebrow">LABORATÓRIO VISUAL · 14 MODELOS ORIGINAIS</div>
  <h1>Escolha a <em>identidade viva</em> do Metrys.</h1>
- <p class="intro">São quatorze modelos animados em SVG, CSS e Canvas, sem imagens estáticas. Mude os estados abaixo para ver como cada agente reage ao ouvir, pensar e falar. Nenhum substitui o personagem atual até você escolher. <a href="#novos-modelos">Ir aos 8 novos modelos ↓</a></p>
+ <p class="intro">São quatorze modelos animados em SVG, CSS e Canvas, sem imagens estáticas. Mude os estados abaixo para ver como cada agente reage aos 13 eventos da conversa, com cores e movimentos próprios. Nenhum substitui o personagem atual até você escolher. <a href="#novos-modelos">Ir aos 8 novos modelos ↓</a></p>
  <div class="controls" role="group" aria-label="Estado da animação">
   <strong>Testar estado:</strong>
   <button class="state-btn" data-state="ocioso" aria-pressed="true">Em repouso</button>
@@ -197,7 +198,7 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
     <span class="premium-flag">8 NOVOS MODELOS ANIMADOS</span>
   </section>
   <div class="premium-extras" style="grid-column:1/-1">
-    <p>Não são fotos, imagens ou GIFs: são desenhos vetoriais procedurais que evoluem em tempo real. Cor, luz e velocidade mudam em cada estado.</p>
+    <p>Não são fotos, imagens ou GIFs: são desenhos vetoriais procedurais que evoluem em tempo real. Cor, luz e velocidade mudam nos 13 estados, incluindo ferramentas, erros, memórias, anexos e online/offline.</p>
     <label for="premium-velocidade">Velocidade <input type="range" id="premium-velocidade" min="0.2" max="2.5" step="0.1" value="1" /><span id="premium-velocidade-valor" class="speed">1.0×</span></label>
   </div>
 
@@ -297,6 +298,7 @@ body[data-state="escutando"] .pulse-bars .bar{animation-duration:.72s}
   }catch(_){}
 })();
 </script>
+<script src="laboratorio-eventos.js" defer></script>
 <script src="laboratorio-premium.js" defer></script>
 </body>
 </html>
