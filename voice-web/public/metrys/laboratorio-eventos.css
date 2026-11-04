@@ -1,0 +1,61 @@
+
+/* Biblioteca de estados: cor + ritmo + comportamento para 14 agentes. */
+:root{--evento-a:#b2622d;--evento-b:#728157;--evento-c:#f0d8b5;--evento-hue:0deg;--evento-intensidade:1}
+body[data-state=ocioso]{--evento-a:#b2622d;--evento-b:#728157;--evento-c:#f0d8b5;--evento-hue:0deg;--pace:1;--pulse:.35}
+body[data-state=escutando]{--evento-a:#bf7935;--evento-b:#a78646;--evento-c:#fff1d1;--evento-hue:13deg;--pace:.62;--pulse:.8}
+body[data-state=pensando]{--evento-a:#718452;--evento-b:#b18f52;--evento-c:#e6ead6;--evento-hue:64deg;--pace:.47;--pulse:.52}
+body[data-state=falando]{--evento-a:#c66a48;--evento-b:#e39b74;--evento-c:#ffe0bf;--evento-hue:-12deg;--pace:.32;--pulse:1}
+body[data-state=gerando]{--evento-a:#bd7840;--evento-b:#b5a164;--evento-c:#fff0c9;--evento-hue:27deg;--pace:.44;--pulse:.88}
+body[data-state=ferramenta]{--evento-a:#607854;--evento-b:#a39a65;--evento-c:#edf1dc;--evento-hue:78deg;--pace:.55;--pulse:.85}
+body[data-state=sucesso]{--evento-a:#537e56;--evento-b:#8dac79;--evento-c:#e7f5df;--evento-hue:112deg;--pace:.7;--pulse:1}
+body[data-state=erro]{--evento-a:#983f49;--evento-b:#bc7678;--evento-c:#f7deda;--evento-hue:-54deg;--pace:1.8;--pulse:.65}
+body[data-state=cancelado]{--evento-a:#80786e;--evento-b:#b6aa9a;--evento-c:#eae2d8;--evento-hue:8deg;--pace:2;--pulse:.24}
+body[data-state=memoria]{--evento-a:#b5913f;--evento-b:#789068;--evento-c:#fff2c4;--evento-hue:32deg;--pace:.65;--pulse:.93}
+body[data-state=anexo]{--evento-a:#617d92;--evento-b:#a8b9ad;--evento-c:#e4f0f5;--evento-hue:174deg;--pace:.72;--pulse:.85}
+body[data-state=offline]{--evento-a:#807255;--evento-b:#89926a;--evento-c:#e7e0d2;--evento-hue:39deg;--pace:1.45;--pulse:.35}
+body[data-state=online]{--evento-a:#b2622d;--evento-b:#d6a66a;--evento-c:#fff0d9;--evento-hue:3deg;--pace:.8;--pulse:.85}
+#eventos-lab{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0 20px;padding:14px 16px;background:rgba(249,244,237,.7);border:1px solid var(--line);border-radius:22px}
+#eventos-lab .titulo-eventos{width:100%;font-size:12px;font-weight:800;letter-spacing:.07em;color:var(--deep)}
+#eventos-lab button{min-height:42px;border:1px solid var(--line);border-radius:999px;padding:8px 13px;background:var(--card);color:var(--text);font-weight:700;font-size:12px;transition:color .16s,background .16s,transform .16s}
+#eventos-lab button[aria-pressed=true]{background:var(--evento-a);border-color:var(--evento-a);color:white}
+#eventos-lab button:hover{transform:translateY(-1px)}
+#detalhe-evento{padding:6px 2px 3px;color:var(--muted);font-size:13px;flex:1;min-width:100%}
+#detalhe-evento strong{color:var(--evento-a)}
+.card .stage{transition:background .45s,border-color .3s}
+.card .stage .event-ring{position:absolute;pointer-events:none;border:1.5px solid var(--evento-a);border-radius:50%;width:157px;height:157px;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.2;animation:evento-respirar calc(3.3s * var(--pace)) ease-in-out infinite;z-index:1}
+.card .stage .event-ring:after{content:'';position:absolute;inset:-11px;border-radius:inherit;border:1px dashed var(--evento-b);opacity:.5;animation:evento-girar calc(9s * var(--pace)) linear infinite}
+.card .stage .event-label{position:absolute;left:17px;bottom:11px;color:var(--evento-a);font-weight:850;font-size:10px;letter-spacing:.09em;text-transform:uppercase;z-index:2;pointer-events:none}
+.card .stage svg,.card .stage .blob-stack,.card .stage .pulse-bars{filter:hue-rotate(var(--evento-hue)) saturate(1.08);transition:filter .4s}
+.card.premium .stage canvas{filter:hue-rotate(var(--evento-hue)) saturate(1.12);transition:filter .45s}
+.card.premium .stage::after{top:13px;bottom:auto;right:16px;opacity:.5}
+.card .choose{transition:background .16s,border-color .16s,box-shadow .16s}
+.card.selected .choose{background:var(--evento-a);border-color:var(--evento-a)}
+body[data-state=escutando] .event-ring{animation:evento-escuta .85s ease-out infinite}
+body[data-state=pensando] .event-ring:after,body[data-state=ferramenta] .event-ring:after{animation-duration:1.7s;opacity:.7}
+body[data-state=gerando] .event-ring{animation:evento-escuta 1.3s ease-out infinite}
+body[data-state=sucesso] .event-ring{animation:evento-sucesso 1.45s ease-out infinite}
+body[data-state=erro] .card .stage{animation:evento-tremor .29s linear 2}
+body[data-state=cancelado] .event-ring{animation:evento-recolher 1.4s ease-in-out infinite}
+body[data-state=memoria] .event-ring{animation:evento-memoria 1.4s ease-out infinite}
+body[data-state=anexo] .event-ring{border-radius:27px;animation:evento-entrada 1.5s ease-in-out infinite}
+body[data-state=offline] .event-ring{opacity:.18;animation-duration:5s}
+body[data-state=online] .event-ring{animation-duration:2s}
+body[data-state=falando] .event-ring{animation:evento-escuta .52s ease-out infinite}
+@keyframes evento-respirar{0%,100%{opacity:.18;transform:translate(-50%,-50%) scale(.9)}50%{opacity:.65;transform:translate(-50%,-50%) scale(1.06)}}
+@keyframes evento-escuta{from{opacity:.75;transform:translate(-50%,-50%) scale(.75)}to{opacity:0;transform:translate(-50%,-50%) scale(1.42)}}
+@keyframes evento-girar{to{transform:rotate(360deg)}}
+@keyframes evento-recolher{0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(1)}50%{opacity:.5;transform:translate(-50%,-50%) scale(.52)}}
+@keyframes evento-sucesso{0%{opacity:1;transform:translate(-50%,-50%) scale(.66)}80%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+@keyframes evento-memoria{0%{opacity:.1;transform:translate(-50%,-50%) scale(1.5)}70%,100%{opacity:.85;transform:translate(-50%,-50%) scale(.78)}}
+@keyframes evento-entrada{0%{opacity:0;transform:translate(-65%,-60%) scale(.6)}45%{opacity:.8}100%{opacity:.15;transform:translate(-50%,-50%) scale(1)}}
+@keyframes evento-tremor{0%,100%{transform:translateX(0)}20%{transform:translateX(-2px)}40%{transform:translateX(2px)}60%{transform:translateX(-1px)}80%{transform:translateX(1px)}}
+@media(max-width:520px){
+ #eventos-lab{padding:11px 10px;border-radius:18px;gap:6px}
+ #eventos-lab button{min-height:44px;padding:7px 10px;font-size:11px}
+ .card .stage .event-ring{width:112px;height:112px}
+ .card .stage .event-label{font-size:8px;left:10px;bottom:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .card .stage .event-ring,.card .stage .event-ring:after{animation:none!important;opacity:.3}
+ .card .stage,.card .stage svg,.card .stage canvas{transition:none!important;animation:none!important}
+}
