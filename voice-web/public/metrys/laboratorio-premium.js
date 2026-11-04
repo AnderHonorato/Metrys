@@ -41,7 +41,8 @@ function glowStroke(ctx,w,cor,blur){
 }
 function estadoAtual(){
  var state=document.body.dataset.state||'ocioso';
- return {nome:state,energia:state==='ocioso'?.45:state==='escutando'?1.18:state==='pensando'?.95:1.48};
+ var model=window.MetrysEstadosLab&&window.MetrysEstadosLab.estado();
+ return {nome:state,energia:model?model.energia:(state==='ocioso'?.45:state==='escutando'?1.18:state==='pensando'?.95:1.48)};
 }
 function orbita(ctx,x,y,r,ang,cor,tamanho){
  var px=x+Math.cos(ang)*r,py=y+Math.sin(ang)*r;
@@ -317,6 +318,7 @@ function quadro(now){
   try{
    ajustar(cfg);ctx.clearRect(0,0,200,200);
    renderers[cfg.id](ctx,tt,e,cfg.ponteiro);
+   if(window.MetrysEstadosLab&&window.MetrysEstadosLab.desenhar)window.MetrysEstadosLab.desenhar(ctx,tt,cfg.id);
   }catch(err){
    if(!cfg.erro){console.warn('Metrys: falha no desenho',cfg.id,err);cfg.erro=true}
   }
