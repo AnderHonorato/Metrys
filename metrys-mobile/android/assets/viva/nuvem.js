@@ -12,6 +12,7 @@
   var online = false, ocupado = false, pedido = '', cancelamento = null, tokenWeb = '', estadoLocal = null;
   function ler(chave, padrao) { try { return JSON.parse(localStorage.getItem(N + chave)) || padrao; } catch (_) { return padrao; } }
   function gravar(chave, valor) { try { localStorage.setItem(N + chave, JSON.stringify(valor)); return true; } catch (_) { return false; } }
+  function emitirEvento(tipo) {try {window.dispatchEvent(new CustomEvent('metrys:evento',{detail:{tipo:tipo}}));}catch (_) {}}
   function avisoMetrys(msg) { var el = document.getElementById('aviso'); if (el) { el.textContent = msg; el.classList.add('ativo'); setTimeout(function () { el.classList.remove('ativo'); }, 3300); } }
   function escapar(t) { return String(t || '').replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   function novoId() { return 'n-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -44,7 +45,7 @@
   function temToken() { return ponte && typeof ponte.nuvemTemToken === 'function' ? String(ponte.nuvemTemToken()) === 'true' : !!tokenWeb; }
   function escolherModo(novo) {
     if (ocupado) { avisoMetrys('Cancele ou conclua a resposta antes de trocar de modo.'); return; }
-    online = novo; atualizarBotao();
+    online = novo; atualizarBotao(); emitirEvento(online ? 'online' : 'offline');
     if (online) { desenhar(); if (!temToken()) abrirPainel(); }
     else if (estadoLocal) receberOriginal(estadoLocal);
     else receberOriginal({modeloPronto:false,gerando:false,modeloNome:'Offline',nomeModelo:'Offline',mensagens:[],conversas:[],projetos:[],fase:'ausente',detalhe:'No navegador, a IA offline so funciona no APK.'});
@@ -58,13 +59,14 @@
     if (!texto) { avisoMetrys('Informe o que devo lembrar.'); return; }
     if (memorias.some(function (m) { return m.texto.toLowerCase() === texto.toLowerCase(); })) { avisoMetrys('Essa memoria ja existe.'); return; }
     memorias.push({id:novoId(), texto:texto}); memorias = memorias.slice(-40);
-    gravar('memorias', memorias); avisoMetrys('Metrys guardou sua memoria neste dispositivo.');
+    if (!gravar('memorias', memorias)) {avisoMetrys('Não foi possível salvar a memória neste dispositivo.'); return;}
+    emitirEvento('memoria'); avisoMetrys('Metrys guardou sua memoria neste dispositivo.');
   }
   function finalizar(id, texto, erro) {
     if (id !== pedido || !ocupado) return;
     ocupado = false; pedido = '';
-    if (erro) avisoMetrys(erro);
-    else if (texto) chat().mensagens.push({papel:'assistant',texto:String(texto).slice(0, 40000)});
+    if (erro) {avisoMetrys(erro);emitirEvento(/cancelad/i.test(erro)?'cancelado':'erro');}
+    else if (texto) {chat().mensagens.push({papel:'assistant',texto:String(texto).slice(0, 40000)});emitirEvento('sucesso');}
     persistir(); desenhar();
   }
   window.receberNuvem = function (r) { if (r && r.id === pedido) finalizar(r.id,r.texto,r.erro); };
@@ -101,7 +103,7 @@
     var mensagens = [{role:'system',content:promptSistema()}].concat(c.mensagens.slice(-14).map(function (m) {
       return {role:m.papel === 'assistant' ? 'assistant' : 'user',content:m.texto.slice(0, 8000)};
     }));
-    ocupado = true; pedido = novoId(); desenhar();
+    ocupado = true; pedido = novoId(); desenhar(); emitirEvento('gerando');
     var id = pedido;
     if (ponte && typeof ponte.nuvemEnviar === 'function') {
       try { ponte.nuvemEnviar(JSON.stringify({id:id,mensagens:mensagens,max_tokens:384})); }
