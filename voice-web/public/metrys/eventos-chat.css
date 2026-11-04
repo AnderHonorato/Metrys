@@ -1,0 +1,80 @@
+/* Metrys: sinais visuais dos eventos reais do chat. Não altera o motor de inferência. */
+body{--m-evento:#b2622d;--m-evento-b:#728157;--m-evento-suave:rgba(178,98,45,.12);--m-evento-ritmo:2.5s}
+body[data-metrys-evento="escutando"]{--m-evento:#bf7935;--m-evento-b:#c69d56;--m-evento-suave:rgba(191,121,53,.13);--m-evento-ritmo:1.1s}
+body[data-metrys-evento="pensando"]{--m-evento:#718452;--m-evento-b:#b18f52;--m-evento-suave:rgba(113,132,82,.14);--m-evento-ritmo:1.35s}
+body[data-metrys-evento="falando"]{--m-evento:#c66a48;--m-evento-b:#e39b74;--m-evento-suave:rgba(198,106,72,.16);--m-evento-ritmo:.65s}
+body[data-metrys-evento="gerando"]{--m-evento:#bd7840;--m-evento-b:#b5a164;--m-evento-suave:rgba(189,120,64,.16);--m-evento-ritmo:.92s}
+body[data-metrys-evento="ferramenta"]{--m-evento:#607854;--m-evento-b:#a39a65;--m-evento-suave:rgba(96,120,84,.15);--m-evento-ritmo:1.25s}
+body[data-metrys-evento="sucesso"]{--m-evento:#537e56;--m-evento-b:#8dac79;--m-evento-suave:rgba(83,126,86,.16);--m-evento-ritmo:.95s}
+body[data-metrys-evento="erro"]{--m-evento:#983f49;--m-evento-b:#bc7678;--m-evento-suave:rgba(152,63,73,.15);--m-evento-ritmo:1.9s}
+body[data-metrys-evento="cancelado"]{--m-evento:#80786e;--m-evento-b:#b6aa9a;--m-evento-suave:rgba(128,120,110,.13);--m-evento-ritmo:2.4s}
+body[data-metrys-evento="memoria"]{--m-evento:#b5913f;--m-evento-b:#789068;--m-evento-suave:rgba(181,145,63,.16);--m-evento-ritmo:1s}
+body[data-metrys-evento="anexo"]{--m-evento:#617d92;--m-evento-b:#a8b9ad;--m-evento-suave:rgba(97,125,146,.14);--m-evento-ritmo:1.3s}
+body[data-metrys-evento="offline"]{--m-evento:#807255;--m-evento-b:#89926a;--m-evento-suave:rgba(128,114,85,.11);--m-evento-ritmo:3.4s}
+body[data-metrys-evento="online"]{--m-evento:#b2622d;--m-evento-b:#d6a66a;--m-evento-suave:rgba(178,98,45,.13);--m-evento-ritmo:2.2s}
+#estadoVivo{
+ position:absolute;top:-40px;right:0;display:flex;align-items:center;gap:9px;
+ background:var(--cartao);border:1px solid var(--linha);border-radius:999px;
+ padding:7px 13px;box-shadow:0 3px 14px rgba(46,43,37,.09);
+ color:var(--texto);font-size:12px;line-height:1.25;font-weight:700;
+ max-width:calc(100% - 16px);min-height:34px;z-index:10;
+ transition:border-color .22s,background .22s,transform .22s;
+ pointer-events:none;
+}
+#estadoVivo .estado-orbita{
+ display:inline-flex;width:10px;height:10px;border-radius:50%;background:var(--m-evento);
+ box-shadow:0 0 0 3px var(--m-evento-suave);
+ animation:metrys-estado-pulso var(--m-evento-ritmo) ease-in-out infinite;flex-shrink:0;
+}
+#estadoVivo .estado-texto{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--m-evento)}
+body[data-metrys-evento="erro"] #estadoVivo{animation:metrys-alerta .25s linear 2}
+body[data-metrys-evento="sucesso"] #estadoVivo,body[data-metrys-evento="memoria"] #estadoVivo{border-color:var(--m-evento-b)}
+body[data-metrys-evento="cancelado"] #estadoVivo .estado-orbita{animation:metrys-recolher .7s ease both}
+#mascoteGrande::before{
+ content:"";position:absolute;inset:9px;border:1.8px solid var(--m-evento);
+ border-radius:50%;opacity:.32;pointer-events:none;z-index:0;
+ animation:metrys-estado-pulso calc(var(--m-evento-ritmo) * 1.6) ease-in-out infinite;
+}
+#mascotePequeno::before{
+ content:"";position:absolute;inset:1px;border:1.8px solid var(--m-evento);
+ border-radius:50%;opacity:.37;pointer-events:none;
+ animation:metrys-estado-pulso var(--m-evento-ritmo) ease-in-out infinite;
+}
+#mascotePequeno canvas{position:relative;z-index:1}
+body[data-metrys-evento="escutando"] #mascoteGrande::before,
+body[data-metrys-evento="gerando"] #mascoteGrande::before,
+body[data-metrys-evento="falando"] #mascoteGrande::before{
+ animation:metrys-radar var(--m-evento-ritmo) ease-out infinite;
+}
+body[data-metrys-evento="pensando"] #mascoteGrande::before,
+body[data-metrys-evento="ferramenta"] #mascoteGrande::before{border-style:dashed;animation:metrys-rotacao var(--m-evento-ritmo) linear infinite;opacity:.7}
+body[data-metrys-evento="memoria"] #mascoteGrande::before{animation:metrys-recolher var(--m-evento-ritmo) ease-in-out infinite;opacity:.68}
+body[data-metrys-evento="cancelado"] #mascoteGrande::before{animation:metrys-recolher .85s ease-in-out infinite}
+body[data-metrys-evento="sucesso"] #mascoteGrande::before{animation:metrys-radar .8s ease-out 2}
+body[data-metrys-evento="erro"] #mascoteGrande{animation:metrys-alerta .28s linear 2}
+body[data-metrys-evento="anexo"] #mascoteGrande::before{border-radius:23px;animation:metrys-pouso 1.05s ease-out 1}
+.entrada-msg{transition:border-color .22s,box-shadow .22s}
+body[data-metrys-evento="pensando"] .entrada-msg,
+body[data-metrys-evento="gerando"] .entrada-msg,
+body[data-metrys-evento="ferramenta"] .entrada-msg,
+body[data-metrys-evento="escutando"] .entrada-msg{
+ border-color:var(--m-evento);box-shadow:0 0 0 2px var(--m-evento-suave),0 4px 15px rgba(46,43,37,.09);
+}
+body[data-metrys-evento="falando"] .mensagem.ia:last-child,
+body[data-metrys-evento="gerando"] .mensagem.ia:last-child{border-left:2px solid var(--m-evento);padding-left:8px}
+body[data-metrys-evento="sucesso"] #andamento{border-color:var(--m-evento)}
+#mascotePequeno:focus-visible{outline:3px solid var(--m-evento);outline-offset:3px}
+@keyframes metrys-estado-pulso{0%,100%{opacity:.28;transform:scale(.91)}50%{opacity:.85;transform:scale(1.12)}}
+@keyframes metrys-radar{from{opacity:.73;transform:scale(.67)}to{opacity:0;transform:scale(1.33)}}
+@keyframes metrys-rotacao{to{transform:rotate(360deg)}}
+@keyframes metrys-recolher{0%{opacity:.7;transform:scale(1.22)}75%,100%{opacity:.2;transform:scale(.76)}}
+@keyframes metrys-pouso{from{opacity:0;transform:translate(-25px,-17px) scale(.85)}to{opacity:.55;transform:translate(0,0) scale(1)}}
+@keyframes metrys-alerta{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+@media(max-width:680px){
+ #estadoVivo{top:-36px;padding:6px 11px;font-size:10.5px;min-height:32px;right:4px;max-width:calc(100% - 8px)}
+ #mascoteGrande::before{inset:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ #estadoVivo,.entrada-msg,#mascoteGrande,#mascoteGrande::before,#mascotePequeno::before,#estadoVivo .estado-orbita{animation:none!important;transition:none!important}
+ #estadoVivo .estado-orbita{opacity:1}
+}
